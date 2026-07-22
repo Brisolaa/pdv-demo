@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatórios — Distribuidora Empório</title>
+<link rel="icon" type="image/png" href="/static/img/favicon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+:root {
+  --primary: #2533468e;
+  --primary-dark: #022c86;
+  --primary-light: #374151;
+  --accent: #059669;
+  --accent-light: #10b981;
+  --success: #059669;
+  --success-dark: #047857;
+  --danger: #dc2626;
+  --danger-dark: #991b1b;
+  --warning: #d97706;
+  --dark: #363030;
+  --dark-lighter: #1a1a1a;
+  --light: #f3f4f6;
+  --border: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #0f0f0fda 0%, #015747 100%);
+  min-height: 100vh;
+  padding: 20px;
+  padding-bottom: 80px;
+  font-size: 18px; /* base maior — acessibilidade */
+}
+
+/* Marca d'água no fundo da página (sobre o verde) — puramente decorativa */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/static/img/pattern-fundo.png');
+  background-repeat: repeat;
+  background-size: 340px auto;
+  opacity: 0.13;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pdv {
+  position: relative;
+  z-index: 1;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap;
+}
+
+.pdv {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.topbar {
+  background: linear-gradient(90deg, #0f0f0f 0%, #1a1a1a 100%);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--accent);
+}
+
+.topbar .logo {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.3px;
+}
+
+.topbar .logo i { color: var(--accent); font-size: 20px; }
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.btn-voltar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px 14px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.btn-voltar:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.section-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: block;
+}
+
+/* --- Filtros --- */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.filtros-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 9px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.chip-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip-check input { width: 17px; height: 17px; cursor: pointer; }
+
+.kbd-badge {
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 4px;
+  padding: 2px 9px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.filtros input[type="date"] {
+  padding: 9px 12px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-primary);
+}
+
+.filtros input[type="date"]:focus { outline: none; border-color: var(--accent); }
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #fff;
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #111827 0%, #0f0f0f 100%);
+  border-color: var(--accent-light);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* --- Cards de resumo --- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--light);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card .card-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card .card-value {
+  font-size: 27px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.card.destaque { background: rgba(5, 150, 105, 0.08); border-color: var(--accent); }
+.card.destaque .card-value { color: var(--success-dark); }
+.card.alerta { background: rgba(217, 119, 6, 0.08); border-color: var(--warning); }
+.card.alerta .card-value { color: var(--warning); }
+.card.perigo { background: rgba(220, 38, 38, 0.08); border-color: var(--danger); }
+.card.perigo .card-value { color: var(--danger); }
+
+/* --- Barra de formas de pagamento --- */
+.forma-bar-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.forma-bar-row:last-child { margin-bottom: 0; }
+.forma-bar-label { display: flex; justify-content: space-between; font-size: 15px; color: var(--text-primary); font-weight: 600; }
+.forma-bar-track { background: var(--light); border-radius: 4px; height: 12px; overflow: hidden; }
+.forma-bar-fill { background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%); height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+/* --- Tabelas --- */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.report-table th {
+  text-align: left;
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.report-table tr:last-child td { border-bottom: none; }
+
+/* Zebra: linhas alternadas facilitam a leitura de tabelas longas de vendas */
+.report-table tbody tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.022);
+}
+
+.report-table tr:hover td { background: rgba(5, 163, 113, 0.06); }
+
+.tag-pagamento {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--light);
+  color: var(--text-secondary);
+}
+
+.tag-suprimento { background: rgba(5, 150, 105, 0.12); color: var(--success-dark); }
+.tag-sangria { background: rgba(220, 38, 38, 0.12); color: var(--danger-dark); }
+
+.report-empty {
+  text-align: center;
+  padding: 30px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.loading-msg {
+  text-align: center;
+  padding: 30px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+.abertura-card {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 28px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+.abertura-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+
+.abertura-card label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.abertura-card input, .abertura-card textarea {
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-family: inherit;
+  width: 100%;
+}
+
+.abertura-card input:focus, .abertura-card textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.abertura-card .row { display: flex; gap: 10px; }
+.abertura-card .row .btn { width: 100%; }
+</style>
+</head>
+<body>
+{% if demo_mode %}
+<div style="background:#7c3aed;color:#fff;text-align:center;padding:8px;font-size:14px;font-family:sans-serif;">
+  🔴 Ambiente de demonstração pública — dados fictícios, reiniciados a cada poucas horas.
+</div>
+{% endif %}
+
+<h2 class="sr-only">Relatórios — Distribuidora Empório</h2>
+
+<div class="pdv">
+  <div class="topbar">
+    <div class="logo"><img src="/static/img/logo.png" alt="" class="logo-img"> Relatórios</div>
+    <a href="/" class="btn-voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i> Voltar ao PDV</a>
+  </div>
+
+  <div class="content">
+
+    <div>
+      <div class="section-label" style="margin-bottom:10px;">Período</div>
+      <div class="filtros">
+        <div class="filtros-rapidos">
+          <button class="chip" data-periodo="hoje" onclick="aplicarPeriodoRapido('hoje')">Hoje</button>
+          <button class="chip" data-periodo="ontem" onclick="aplicarPeriodoRapido('ontem')">Ontem</button>
+          <button class="chip" data-periodo="7dias" onclick="aplicarPeriodoRapido('7dias')">Últimos 7 dias</button>
+          <button class="chip" data-periodo="mes" onclick="aplicarPeriodoRapido('mes')">Este mês</button>
+          <button class="chip" data-periodo="ano" onclick="aplicarPeriodoRapido('ano')">Este ano</button>
+        </div>
+        <input type="date" id="dataInicio" onchange="limparChipAtivo()">
+        <input type="date" id="dataFim" onchange="limparChipAtivo()">
+        <button class="btn btn-primary" onclick="buscarRelatorio()" style="gap:10px;"><i class="ti ti-search" aria-hidden="true"></i> Buscar <span class="kbd-badge">F6</span></button>
+        <button class="btn btn-primary" onclick="imprimirRelatorio()" style="gap:10px;"><i class="ti ti-printer" aria-hidden="true"></i> Imprimir <span class="kbd-badge">F9</span></button>
+        <button class="btn btn-primary" onclick="exportarCsv()" style="gap:10px;"><i class="ti ti-download" aria-hidden="true"></i> Exportar CSV</button>
+        <button class="btn btn-primary" style="background:#25D366; border-color:#25D366;" onclick="compartilharWhatsApp()"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp</button>
+        <button class="btn btn-primary" onclick="compartilharEmail()"><i class="ti ti-mail" aria-hidden="true"></i> Email</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" style="margin-bottom:10px;">Formas de pagamento</div>
+      <div class="filtros-rapidos" id="filtroFormas" style="align-items:center;">
+        <label class="chip-check"><input type="checkbox" value="Dinheiro" checked onchange="buscarRelatorio()"> Dinheiro</label>
+        <label class="chip-check"><input type="checkbox" value="Crédito" checked onchange="buscarRelatorio()"> Crédito</label>
+        <label class="chip-check"><input type="checkbox" value="Débito" checked onchange="buscarRelatorio()"> Débito</label>
+        <label class="chip-check"><input type="checkbox" value="Pix" checked onchange="buscarRelatorio()"> Pix</label>
+        <label class="chip-check"><input type="checkbox" value="VR" checked onchange="buscarRelatorio()"> VR</label>
+        <button class="chip" onclick="marcarTodasFormas(true)">Marcar tudo</button>
+        <button class="chip" onclick="marcarTodasFormas(false)">Desmarcar tudo</button>
+      </div>
+    </div>
+
+    <div id="conteudoRelatorio">
+      <div class="loading-msg">Carregando...</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="modalDetalheVenda" class="modal-overlay">
+  <div class="abertura-card">
+    <h3>Detalhe da Venda</h3>
+    <div id="detalheVendaConteudo"><div class="loading-msg">Carregando...</div></div>
+    <div id="detalheVendaAcoes" class="row"></div>
+  </div>
+</div>
+
+<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; color:#fff; padding:12px; display:flex; justify-content:center; gap:25px; z-index:9999; font-weight:bold; border-top: 2px solid #059669;">
+    <span style="cursor:pointer;" onclick="window.location.href='/'">[F1] Vendas</span>
+    <span style="cursor:pointer;" onclick="window.location.href='/estoque'">[F2] Estoque</span>
+    <span style="cursor:pointer;" onclick="window.location.href='/relatorios'">[F3] Relatórios</span>
+    <span style="cursor:pointer;" onclick="abrirTelaDeAtalhos()">[?] Atalhos</span>
+</div>
+
+<script src="/static/js/pdv_base.js"></script>
+<script>
+    function fmt(v) {
+        return "R$ " + (parseFloat(v) || 0).toFixed(2).replace('.', ',');
+    }
+
+    function paraISO(data) {
+        // Date -> "YYYY-MM-DD" respeitando o fuso local (evita o bug clássico do toISOString em UTC)
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function formatarDataHora(dataHoraSQL) {
+        if (!dataHoraSQL) return '—';
+        const [data, hora] = dataHoraSQL.split(' ');
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano} ${hora ? hora.slice(0, 5) : ''}`;
+    }
+
+    function formasSelecionadas() {
+        return Array.from(document.querySelectorAll('#filtroFormas input[type="checkbox"]:checked')).map(c => c.value);
+    }
+
+    function marcarTodasFormas(marcar) {
+        document.querySelectorAll('#filtroFormas input[type="checkbox"]').forEach(c => c.checked = marcar);
+        buscarRelatorio();
+    }
+
+    function limparChipAtivo() {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    }
+
+    function aplicarPeriodoRapido(periodo) {
+        limparChipAtivo();
+        document.querySelector(`.chip[data-periodo="${periodo}"]`).classList.add('active');
+
+        const hoje = new Date();
+        let inicio = new Date(hoje);
+        let fim = new Date(hoje);
+
+        if (periodo === 'ontem') {
+            inicio.setDate(hoje.getDate() - 1);
+            fim.setDate(hoje.getDate() - 1);
+        } else if (periodo === '7dias') {
+            inicio.setDate(hoje.getDate() - 6);
+        } else if (periodo === 'mes') {
+            inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        } else if (periodo === 'ano') {
+            inicio = new Date(hoje.getFullYear(), 0, 1);
+        }
+        // 'hoje' já cobre o caso padrão (inicio = fim = hoje)
+
+        document.getElementById('dataInicio').value = paraISO(inicio);
+        document.getElementById('dataFim').value = paraISO(fim);
+        buscarRelatorio();
+    }
+
+    let ultimoRelatorio = null;
+
+    async function buscarRelatorio() {
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+        const container = document.getElementById('conteudoRelatorio');
+        const formas = formasSelecionadas();
+        const todasFormas = document.querySelectorAll('#filtroFormas input[type="checkbox"]').length;
+
+        if (!inicio || !fim) {
+            container.innerHTML = `<div class="report-empty">Selecione um período pra buscar.</div>`;
+            return;
+        }
+
+        if (formas.length === 0) {
+            container.innerHTML = `<div class="report-empty">Nenhuma forma de pagamento selecionada — marque ao menos uma pra ver resultados.</div>`;
+            return;
+        }
+
+        container.innerHTML = `<div class="loading-msg">Buscando...</div>`;
+
+        try {
+            // Se todas estão marcadas, não manda filtro (evita query desnecessária no back-end)
+            const data = await API.relatorios.resumo(inicio, fim, formas.length === todasFormas ? [] : formas);
+
+            if (!data.sucesso) {
+                container.innerHTML = `<div class="report-empty">${data.mensagem || 'Erro ao buscar relatório.'}</div>`;
+                return;
+            }
+
+            renderizarRelatorio(data);
+            ultimoRelatorio = data;
+        } catch (e) {
+            console.error("Erro ao buscar relatório:", e);
+            container.innerHTML = `<div class="report-empty">Falha de comunicação ao buscar o relatório.</div>`;
+        }
+    }
+
+    function renderizarRelatorio(data) {
+        const r = data.resumo;
+        const saldoPeriodo = r.faturamento_total + r.total_suprimentos - r.total_sangrias;
+
+        const maiorForma = data.por_forma_pagamento.reduce((max, f) => Math.max(max, f.total), 0) || 1;
+
+        const barrasFormaPagamento = data.por_forma_pagamento.length
+            ? data.por_forma_pagamento.map(f => `
+                <div class="forma-bar-row">
+                    <div class="forma-bar-label"><span>${f.forma_pagamento}</span><span>${fmt(f.total)}</span></div>
+                    <div class="forma-bar-track"><div class="forma-bar-fill" style="width:${(f.total / maiorForma * 100).toFixed(1)}%"></div></div>
+                </div>
+            `).join('')
+            : `<div class="report-empty">Nenhuma venda no período.</div>`;
+
+        const linhasVendas = data.vendas.length
+            ? data.vendas.map(v => `
+                <tr style="cursor:pointer;${v.estornada ? ' opacity:0.55;' : ''}" onclick="abrirDetalheVenda(${v.id})">
+                    <td>${formatarDataHora(v.data_hora)}</td>
+                    <td>${v.operador}</td>
+                    <td><span class="tag-pagamento">${v.forma_pagamento}</span>${v.estornada ? ' <span class="tag-pagamento tag-sangria">ESTORNADA</span>' : ''}</td>
+                    <td><strong style="${v.estornada ? 'text-decoration:line-through;' : ''}">${fmt(v.total)}</strong></td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="4" class="report-empty">Nenhuma venda no período.</td></tr>`;
+
+        const linhasFluxo = data.fluxo.length
+            ? data.fluxo.map(f => `
+                <tr>
+                    <td>${formatarDataHora(f.data_hora)}</td>
+                    <td><span class="tag-pagamento ${f.tipo === 'SUPRIMENTO' ? 'tag-suprimento' : 'tag-sangria'}">${f.tipo}</span></td>
+                    <td>${f.operador}</td>
+                    <td>${f.justificativa || '—'}</td>
+                    <td><strong>${fmt(f.valor)}</strong></td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="5" class="report-empty">Nenhuma sangria/suprimento no período.</td></tr>`;
+
+        const linhasExtrato = data.extrato.length
+            ? data.extrato.map(e => {
+                const tagClasse = e.tipo === 'VENDA' ? 'tag-pagamento' : (e.tipo === 'SUPRIMENTO' ? 'tag-pagamento tag-suprimento' : 'tag-pagamento tag-sangria');
+                const sinal = e.tipo === 'SANGRIA' ? '−' : '+';
+                const cor = e.tipo === 'SANGRIA' ? 'var(--danger)' : 'var(--success-dark)';
+                return `
+                    <tr${e.estornada ? ' style="opacity:0.55;"' : ''}>
+                        <td>${formatarDataHora(e.data_hora)}</td>
+                        <td><span class="${tagClasse}">${e.tipo}</span>${e.estornada ? ' <span class="tag-pagamento tag-sangria">ESTORNADA</span>' : ''}</td>
+                        <td>${e.operador}</td>
+                        <td>${e.detalhe || '—'}</td>
+                        <td style="color:${cor}; font-weight:700; ${e.estornada ? 'text-decoration:line-through;' : ''}">${sinal} ${fmt(e.valor)}</td>
+                    </tr>
+                `;
+            }).join('')
+            : `<tr><td colspan="5" class="report-empty">Nenhuma movimentação no período.</td></tr>`;
+
+        const maiorProduto = data.top_produtos.reduce((max, p) => Math.max(max, p.quantidade), 0) || 1;
+        const barrasTopProdutos = data.top_produtos.length
+            ? data.top_produtos.map(p => `
+                <div class="forma-bar-row">
+                    <div class="forma-bar-label"><span>${p.descricao}</span><span>${p.quantidade} un.</span></div>
+                    <div class="forma-bar-track"><div class="forma-bar-fill" style="width:${(p.quantidade / maiorProduto * 100).toFixed(1)}%"></div></div>
+                </div>
+            `).join('')
+            : `<div class="report-empty">Nenhum produto vendido no período.</div>`;
+
+        const linhasEstornos = data.estornos.length
+            ? data.estornos.map(e => `
+                <tr style="cursor:pointer;" onclick="abrirDetalheVenda(${e.id})">
+                    <td>#${e.id} — ${formatarDataHora(e.data_hora)}</td>
+                    <td>${formatarDataHora(e.data_estorno)}</td>
+                    <td>${e.operador}</td>
+                    <td>${e.motivo_estorno || '—'}</td>
+                    <td><strong>${fmt(e.total)}</strong></td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="5" class="report-empty">Nenhum estorno no período.</td></tr>`;
+
+        document.getElementById('conteudoRelatorio').innerHTML = `
+            <div>
+                <div class="section-label" style="margin-bottom:10px;">Resumo do período</div>
+                <div class="cards">
+                    <div class="card destaque">
+                        <div class="card-label"><i class="ti ti-cash" aria-hidden="true"></i> Faturamento</div>
+                        <div class="card-value">${fmt(r.faturamento_total)}</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label"><i class="ti ti-receipt" aria-hidden="true"></i> Nº Vendas</div>
+                        <div class="card-value">${r.numero_vendas}</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label"><i class="ti ti-ticket" aria-hidden="true"></i> Ticket Médio</div>
+                        <div class="card-value">${fmt(r.ticket_medio)}</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-label"><i class="ti ti-arrow-down-circle" aria-hidden="true"></i> Suprimentos</div>
+                        <div class="card-value">${fmt(r.total_suprimentos)}</div>
+                    </div>
+                    <div class="card alerta">
+                        <div class="card-label"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i> Sangrias</div>
+                        <div class="card-value">${fmt(r.total_sangrias)}</div>
+                    </div>
+                    <div class="card ${saldoPeriodo >= 0 ? 'destaque' : 'perigo'}">
+                        <div class="card-label"><i class="ti ti-scale" aria-hidden="true"></i> Saldo do período</div>
+                        <div class="card-value">${fmt(saldoPeriodo)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px; font-size:14px;">Vendas do período (${data.vendas.length})</div>
+                <div style="background:rgba(5,150,105,0.06); border:2px solid var(--accent); border-radius:6px; padding:6px;">
+                    <table class="report-table" style="font-size:15px;">
+                        <thead><tr><th>Data/Hora</th><th>Operador</th><th>Forma de Pagamento</th><th>Total</th></tr></thead>
+                        <tbody>${linhasVendas}</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px;">Faturamento por forma de pagamento</div>
+                <div style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:16px;">
+                    ${barrasFormaPagamento}
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px;">Produtos mais vendidos</div>
+                <div style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:16px;">
+                    ${barrasTopProdutos}
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px; font-size:11px; color:var(--text-secondary);">Extrato de caixa do período (${data.extrato.length})</div>
+                <div style="opacity:0.9;">
+                    <table class="report-table" style="font-size:12px;">
+                        <thead><tr><th>Data/Hora</th><th>Tipo</th><th>Operador</th><th>Detalhe</th><th>Valor</th></tr></thead>
+                        <tbody>${linhasExtrato}</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px;">Sangrias e suprimentos do período (${data.fluxo.length})</div>
+                <table class="report-table">
+                    <thead><tr><th>Data/Hora</th><th>Tipo</th><th>Operador</th><th>Justificativa</th><th>Valor</th></tr></thead>
+                    <tbody>${linhasFluxo}</tbody>
+                </table>
+            </div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:10px;">Estornos do período (${data.estornos.length})</div>
+                <table class="report-table">
+                    <thead><tr><th>Venda original</th><th>Estornada em</th><th>Operador</th><th>Motivo</th><th>Valor</th></tr></thead>
+                    <tbody>${linhasEstornos}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    let vendaDetalheAtual = null;
+
+    async function abrirDetalheVenda(id) {
+        document.getElementById('modalDetalheVenda').style.display = 'flex';
+        document.getElementById('detalheVendaConteudo').innerHTML = `<div class="loading-msg">Carregando...</div>`;
+        document.getElementById('detalheVendaAcoes').innerHTML = '';
+
+        try {
+            const resp = await API.relatorios.detalheVenda(id);
+            if (!resp.sucesso) {
+                document.getElementById('detalheVendaConteudo').innerHTML = `<div class="report-empty">${resp.mensagem || 'Erro ao carregar venda.'}</div>`;
+                return;
+            }
+            vendaDetalheAtual = resp.venda;
+            renderizarDetalheVenda(resp.venda);
+        } catch (e) {
+            console.error("Erro ao buscar detalhe da venda:", e);
+            document.getElementById('detalheVendaConteudo').innerHTML = `<div class="report-empty">Falha de comunicação.</div>`;
+        }
+    }
+
+    function fecharDetalheVenda() {
+        document.getElementById('modalDetalheVenda').style.display = 'none';
+        vendaDetalheAtual = null;
+    }
+
+    function renderizarDetalheVenda(v) {
+        const linhasItens = v.itens.length
+            ? v.itens.map(i => `
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;">
+                    <span>${i.quantidade}x ${i.descricao}</span>
+                    <span>${fmt(i.quantidade * i.preco_unitario)}</span>
+                </div>
+            `).join('')
+            : `<div style="font-size:13px; color:var(--text-secondary);">Sem itens detalhados (venda antiga, anterior a essa funcionalidade).</div>`;
+
+        const linhasPagamentos = v.pagamentos.map(p => `
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding:2px 0; color:var(--text-secondary);">
+                <span>${p.forma_pagamento}</span><span>${fmt(p.valor)}</span>
+            </div>
+        `).join('');
+
+        document.getElementById('detalheVendaConteudo').innerHTML = `
+            <div style="font-size:13px; color:var(--text-secondary);">
+                #${v.id} — ${formatarDataHora(v.data_hora)} — ${v.operador}
+            </div>
+            ${v.estornada ? `<div style="background:rgba(220,38,38,0.1); color:var(--danger-dark); padding:8px 10px; border-radius:4px; font-size:13px; font-weight:700;">
+                ESTORNADA em ${formatarDataHora(v.data_estorno)}${v.motivo_estorno ? ' — ' + v.motivo_estorno : ''}
+            </div>` : ''}
+            <div>
+                <div class="section-label" style="margin-bottom:6px;">Itens</div>
+                ${linhasItens}
+            </div>
+            <hr style="border:none; border-top:1px solid var(--border);">
+            <div>
+                <div class="section-label" style="margin-bottom:6px;">Pagamento</div>
+                ${linhasPagamentos}
+            </div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:16px; padding-top:6px; border-top:1px solid var(--border);">
+                <span>Total</span><span>${fmt(v.total)}</span>
+            </div>
+        `;
+
+        document.getElementById('detalheVendaAcoes').innerHTML = v.estornada
+            ? `<button class="btn btn-cancel" style="width:100%;" onclick="fecharDetalheVenda()">Fechar</button>`
+            : `<button class="btn btn-cancel" onclick="fecharDetalheVenda()">Fechar</button>
+               <button class="btn" style="background:var(--danger); color:#fff;" onclick="abrirConfirmarEstorno()">
+                   <i class="ti ti-receipt-refund" aria-hidden="true"></i> Estornar venda
+               </button>`;
+    }
+
+    function abrirConfirmarEstorno() {
+        document.getElementById('detalheVendaAcoes').innerHTML = `
+            <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
+                <div style="background:rgba(220,38,38,0.08); color:var(--danger-dark); padding:10px; border-radius:4px; font-size:13px; font-weight:600;">
+                    Isso vai anular a venda no faturamento e devolver os itens ao estoque. Não pode ser desfeito.
+                </div>
+                <div>
+                    <label>Motivo do estorno (opcional, fica registrado)</label>
+                    <textarea id="motivoEstornoInput" rows="2" style="margin-top:5px; resize:vertical;" placeholder="Ex: cliente desistiu da compra"></textarea>
+                </div>
+                <div class="row">
+                    <button class="btn btn-cancel" onclick="renderizarDetalheVenda(vendaDetalheAtual)">Voltar</button>
+                    <button class="btn" style="background:var(--danger); color:#fff;" onclick="estornarVendaAtual()">Confirmar Estorno</button>
+                </div>
+            </div>
+        `;
+    }
+
+    async function estornarVendaAtual() {
+        if (!vendaDetalheAtual) return;
+        const motivo = document.getElementById('motivoEstornoInput').value.trim();
+
+        try {
+            const resp = await API.vendas.estornar({ venda_id: vendaDetalheAtual.id, motivo: motivo });
+            if (resp.sucesso) {
+                fecharDetalheVenda();
+                buscarRelatorio(); // recarrega os números já sem essa venda no faturamento
+            } else {
+                alert(resp.mensagem || "Erro ao estornar venda.");
+            }
+        } catch (e) {
+            console.error("Erro ao estornar venda:", e);
+            alert("Falha de comunicação ao estornar.");
+        }
+    }
+
+    function imprimirRelatorio() {
+        if (!ultimoRelatorio) { alert("Busque um relatório primeiro."); return; }
+
+        const r = ultimoRelatorio.resumo;
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+        const periodo = inicio === fim ? formatarDataCurta(inicio) : `${formatarDataCurta(inicio)} a ${formatarDataCurta(fim)}`;
+        const saldo = r.faturamento_total + r.total_suprimentos - r.total_sangrias;
+        const emitidoEm = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+        const linhaResumo = (label, valor) =>
+            `<tr><td>${label}</td><td style="text-align:right"><strong>${valor}</strong></td></tr>`;
+
+        const formasHtml = ultimoRelatorio.por_forma_pagamento.length
+            ? ultimoRelatorio.por_forma_pagamento.map(f =>
+                `<tr><td>${f.forma_pagamento}</td><td style="text-align:right">${fmt(f.total)}</td></tr>`).join('')
+            : `<tr><td colspan="2">Nenhuma venda no período.</td></tr>`;
+
+        const topHtml = ultimoRelatorio.top_produtos.length
+            ? ultimoRelatorio.top_produtos.map(p =>
+                `<tr><td>${p.descricao}</td><td style="text-align:right">${p.quantidade} un.</td></tr>`).join('')
+            : `<tr><td colspan="2">Nenhum produto vendido.</td></tr>`;
+
+        const vendasHtml = ultimoRelatorio.vendas.length
+            ? ultimoRelatorio.vendas.map(v =>
+                `<tr${v.estornada ? ' class="estornada"' : ''}>
+                    <td>${formatarDataHora(v.data_hora)}</td>
+                    <td>${v.operador}</td>
+                    <td>${v.forma_pagamento}${v.estornada ? ' (ESTORNADA)' : ''}</td>
+                    <td style="text-align:right">${fmt(v.total)}</td>
+                 </tr>`).join('')
+            : `<tr><td colspan="4">Nenhuma venda no período.</td></tr>`;
+
+        const fluxoHtml = ultimoRelatorio.fluxo.length
+            ? ultimoRelatorio.fluxo.map(f =>
+                `<tr>
+                    <td>${formatarDataHora(f.data_hora)}</td>
+                    <td>${f.tipo}</td>
+                    <td>${f.operador}</td>
+                    <td>${f.justificativa || '—'}</td>
+                    <td style="text-align:right">${fmt(f.valor)}</td>
+                 </tr>`).join('')
+            : `<tr><td colspan="5">Nenhuma movimentação no período.</td></tr>`;
+
+        const html = `
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Relatório ${periodo} — Distribuidora Empório</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 0; padding: 24px; font-size: 12px; }
+  header { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #059669; padding-bottom: 12px; margin-bottom: 16px; }
+  header img { height: 60px; }
+  h1 { font-size: 18px; margin: 0; }
+  .sub { color: #555; font-size: 12px; margin-top: 3px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #059669; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin: 18px 0 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; color: #666; border-bottom: 1px solid #999; padding: 5px 4px; }
+  td { padding: 5px 4px; border-bottom: 1px solid #eee; }
+  .resumo td { font-size: 13px; }
+  .destaque { background: #f0fdf9; }
+  .estornada td { color: #999; text-decoration: line-through; }
+  footer { margin-top: 22px; border-top: 1px solid #ddd; padding-top: 8px; font-size: 10px; color: #777; text-align: center; }
+  @media print {
+    body { padding: 0; }
+    h2 { break-after: avoid; }
+    tr { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <img src="/static/img/logo.png" alt="">
+    <div>
+      <h1>Relatório de Caixa</h1>
+      <div class="sub">Distribuidora Empório — Período: <strong>${periodo}</strong></div>
+      <div class="sub">Emitido em ${emitidoEm}</div>
+    </div>
+  </header>
+
+  <h2>Resumo do período</h2>
+  <table class="resumo">
+    ${linhaResumo('Faturamento total', fmt(r.faturamento_total))}
+    ${linhaResumo('Nº de vendas', r.numero_vendas)}
+    ${linhaResumo('Ticket médio', fmt(r.ticket_medio))}
+    ${linhaResumo('Suprimentos', fmt(r.total_suprimentos))}
+    ${linhaResumo('Sangrias', fmt(r.total_sangrias))}
+    <tr class="destaque"><td><strong>Saldo do período</strong></td><td style="text-align:right"><strong>${fmt(saldo)}</strong></td></tr>
+  </table>
+
+  <h2>Faturamento por forma de pagamento</h2>
+  <table><tbody>${formasHtml}</tbody></table>
+
+  <h2>Produtos mais vendidos</h2>
+  <table><tbody>${topHtml}</tbody></table>
+
+  <h2>Vendas do período (${ultimoRelatorio.vendas.length})</h2>
+  <table>
+    <thead><tr><th>Data/Hora</th><th>Operador</th><th>Forma de pagamento</th><th style="text-align:right">Total</th></tr></thead>
+    <tbody>${vendasHtml}</tbody>
+  </table>
+
+  <h2>Sangrias e suprimentos (${ultimoRelatorio.fluxo.length})</h2>
+  <table>
+    <thead><tr><th>Data/Hora</th><th>Tipo</th><th>Operador</th><th>Justificativa</th><th style="text-align:right">Valor</th></tr></thead>
+    <tbody>${fluxoHtml}</tbody>
+  </table>
+
+  <footer>Documento gerado pelo Sistema PDV — Distribuidora Empório</footer>
+</body>
+</html>`;
+
+        const janela = window.open('', '_blank');
+        if (!janela) { alert("O navegador bloqueou a janela de impressão. Libere os pop-ups para este site."); return; }
+        janela.document.write(html);
+        janela.document.close();
+        // Espera a logo carregar antes de abrir o diálogo de impressão
+        janela.onload = () => { janela.focus(); janela.print(); };
+    }
+
+    function exportarCsv() {
+        if (!ultimoRelatorio || !ultimoRelatorio.extrato.length) {
+            alert("Não há dados pra exportar. Busque um período com movimentações primeiro.");
+            return;
+        }
+
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+
+        const cabecalho = ['Data/Hora', 'Tipo', 'Operador', 'Detalhe', 'Valor'];
+        const linhas = ultimoRelatorio.extrato.map(e => [
+            e.data_hora,
+            e.tipo,
+            e.operador,
+            (e.detalhe || '').replace(/;/g, ','),
+            (e.tipo === 'SANGRIA' ? -e.valor : e.valor).toFixed(2).replace('.', ',')
+        ]);
+
+        const csv = [cabecalho, ...linhas]
+            .map(linha => linha.map(campo => `"${String(campo).replace(/"/g, '""')}"`).join(';'))
+            .join('\n');
+
+        // BOM UTF-8 pro Excel abrir os acentos corretamente
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `extrato_caixa_${inicio}_a_${fim}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function montarResumoTexto() {
+        if (!ultimoRelatorio) return null;
+        const r = ultimoRelatorio.resumo;
+        const inicio = document.getElementById('dataInicio').value;
+        const fim = document.getElementById('dataFim').value;
+        const periodo = inicio === fim ? formatarDataCurta(inicio) : `${formatarDataCurta(inicio)} a ${formatarDataCurta(fim)}`;
+
+        let texto = `📊 Relatório de Caixa — Distribuidora Empório\n`;
+        texto += `Período: ${periodo}\n\n`;
+        texto += `💰 Faturamento total: ${fmt(r.faturamento_total)}\n`;
+        texto += `🧾 Nº de vendas: ${r.numero_vendas}\n`;
+        texto += `🎫 Ticket médio: ${fmt(r.ticket_medio)}\n`;
+        texto += `📥 Suprimentos: ${fmt(r.total_suprimentos)}\n`;
+        texto += `📤 Sangrias: ${fmt(r.total_sangrias)}\n`;
+
+        if (ultimoRelatorio.por_forma_pagamento.length) {
+            texto += `\n💳 Por forma de pagamento:\n`;
+            ultimoRelatorio.por_forma_pagamento.forEach(f => {
+                texto += `- ${f.forma_pagamento}: ${fmt(f.total)}\n`;
+            });
+        }
+
+        if (ultimoRelatorio.estornos.length) {
+            texto += `\n⚠️ Estornos no período: ${ultimoRelatorio.estornos.length}\n`;
+        }
+
+        return texto;
+    }
+
+    function formatarDataCurta(dataISO) {
+        if (!dataISO) return '';
+        const [ano, mes, dia] = dataISO.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function compartilharWhatsApp() {
+        const texto = montarResumoTexto();
+        if (!texto) { alert("Busque um relatório primeiro."); return; }
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    function compartilharEmail() {
+        const texto = montarResumoTexto();
+        if (!texto) { alert("Busque um relatório primeiro."); return; }
+        const assunto = encodeURIComponent("Relatório de Caixa — Distribuidora Empório");
+        const corpo = encodeURIComponent(texto);
+        window.location.href = `mailto:?subject=${assunto}&body=${corpo}`;
+    }
+
+    window.addEventListener('keydown', e => {
+        if (e.key === 'Escape') fecharDetalheVenda();
+    });
+
+    // Ao abrir a tela, já busca o dia de hoje
+    // --- Atalhos de teclado desta tela (chamados de pdv_base.js) ---
+    function atalhoF6() {
+        buscarRelatorio();
+    }
+    function atalhoF9() {
+        imprimirRelatorio();
+    }
+
+    window.ATALHOS_DESTA_TELA = [
+        { tecla: 'F6', acao: 'Buscar relatório' },
+        { tecla: 'F9', acao: 'Imprimir relatório' },
+    ];
+
+    aplicarPeriodoRapido('hoje');
+</script>
+</body>
+</html>

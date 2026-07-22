@@ -1,0 +1,2047 @@
+<link rel="icon" type="image/png" href="/static/img/favicon.png">
+<title>PDV — Distribuidora Empório</title>
+<script src="/static/js/pdv_base.js"></script>
+<style>
+:root {
+  --primary: #2533468e;
+  --primary-dark: #022c86;
+  --primary-light: #374151;
+  --accent: #059669;
+  --accent-light: #10b981;
+  --success: #059669;
+  --success-dark: #047857;
+  --danger: #dc2626;
+  --danger-dark: #991b1b;
+  --warning: #d97706;
+  --dark: #363030;
+  --dark-lighter: #1a1a1a;
+  --light: #f3f4f6;
+  --border: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #0f0f0fda 0%, #015747 100%);
+  min-height: 100vh;
+  padding: 20px;
+  font-size: 18px; /* base maior — acessibilidade */
+}
+
+/* Marca d'água no fundo da página (sobre o verde) — puramente decorativa */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/static/img/pattern-fundo.png');
+  background-repeat: repeat;
+  background-size: 340px auto;
+  opacity: 0.13;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pdv {
+  position: relative;
+  z-index: 1;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.pdv {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.topbar {
+  background: linear-gradient(90deg, #0f0f0f 0%, #1a1a1a 100%);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--accent);
+}
+
+.topbar .logo {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.3px;
+}
+
+.topbar .logo i {
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* Marca d'água sutil no fundo do carrinho — puramente decorativa */
+.cart-wrap {
+  position: relative;
+}
+
+.cart-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/static/img/watermark-carrinho.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.10;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cart-wrap > * {
+  position: relative;
+  z-index: 1;
+}
+
+.badge-caixa {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.badge-aberto {
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+.badge-fechado {
+  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.badge-contingencia {
+  background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: 520px;
+}
+
+.left {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.right {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+.section-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 17px;
+  background: #ffffff;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.btn {
+  padding: 13px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background: var(--light);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+  background: var(--border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #fff;
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #111827 0%, #0f0f0f 100%);
+  border-color: var(--accent-light);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.25);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, var(--danger-dark) 0%, #991b1b 100%);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+  transform: translateY(-2px scale(1.01));
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+  font-weight: 700;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+  transform: translateY(-2px);
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.cart-table th {
+  text-align: left;
+  padding: 13px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cart-table td {
+  padding: 13px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: middle;
+  transition: background-color 0.2s ease;
+}
+
+.cart-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Zebra: linhas alternadas ajudam a seguir o produto até o preço sem se perder */
+.cart-table tbody tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.022);
+}
+
+/* Confirmação visual do item recém-bipado — o operador vê que entrou sem precisar ler */
+@keyframes flashItem {
+  0%   { background: rgba(5, 150, 105, 0.45); }
+  100% { background: transparent; }
+}
+
+.cart-table tbody tr.item-novo td {
+  animation: flashItem 1.1s ease-out;
+}
+
+.cart-table tr:hover td {
+  background: rgba(5, 163, 113, 0.1);
+}
+
+.cart-empty {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.inp-preco-carrinho {
+  width: 80px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: #f9fafb;
+}
+.inp-preco-carrinho:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--border);
+  background: linear-gradient(90deg, rgba(5, 150, 105, 0.08) 0%, transparent 100%);
+  padding: 16px 12px;
+  border-radius: 4px;
+}
+
+.total-label {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-value {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--success-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pay-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pay-btn {
+  padding: 16px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  background: #ffffff;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.pay-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pay-btn:hover {
+  background: var(--light);
+  border-color: var(--accent);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.15);
+}
+
+.pay-btn.active {
+  border-color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.pay-btn i {
+  font-size: 22px;
+}
+
+.pay-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.pay-input-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 16px;
+  background: #ffffff;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.pay-input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+}
+
+.pay-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+  color: #ffffff;
+  margin: 3px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+  transition: all 0.2s ease;
+}
+
+.pay-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  padding: 0 4px;
+}
+
+.pay-tag button:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-warn {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #166534;
+  border: 1px solid #86efac;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.troco-info {
+  font-size: 16px;
+  color: var(--text-secondary);
+  text-align: right;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.troco-destaque {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.screen-fechado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #eff2f5 100%);
+  min-height: 520px;
+}
+
+.abertura-card {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 32px;
+  max-width: 360px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.abertura-card input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: #ffffff;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.abertura-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(6, 161, 112, 0.15);
+}
+
+.del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.del-btn:hover {
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.1);
+  transform: scale(1.15);
+}
+
+.qty-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qty-cell button {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.qty-cell button:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+.qty-cell span {
+  min-width: 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-bar {
+  background: linear-gradient(90deg, #0f0f0f 0%, #1a1a1a 100%);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border);
+}
+
+.status-info-group {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.status-bar span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.status-bar .s-val {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.status-actions-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-status-mov {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-status-mov:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.15);
+}
+
+.escolha-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+.escolha-item:hover {
+  border-color: var(--accent);
+  background: rgba(5, 150, 105, 0.05);
+}
+
+.escolha-item:focus-visible,
+.escolha-item:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(5, 150, 105, 0.1);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.kbd-badge {
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 4px;
+  padding: 2px 9px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.btn-footer-danger {
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-footer-danger:hover {
+  background: linear-gradient(135deg, var(--danger-dark) 0%, #991b1b 100%);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+  transform: translateY(-2px);
+}
+@media print {
+    body * { visibility: hidden !important; }
+    
+    #ticket-impressao, #ticket-impressao * { 
+        visibility: visible !important; 
+        display: block !important; 
+    }
+    
+    #ticket-impressao { 
+        position: absolute !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 100% !important; 
+    }
+}
+
+.alerta-sucesso {
+    height: 30px; 
+    overflow: hidden;
+    transition: opacity 0.3s;
+    margin-bottom: 10px;
+}
+
+</style>
+
+
+
+<h2 class="sr-only">Sistema PDV — Distribuidora Empório</h2>
+
+<div class="pdv" id="app">
+  <div class="topbar">
+    <div class="logo"><img src="/static/img/logo.png" alt="" class="logo-img"> Distribuidora Empório</div>
+    <span class="badge-caixa" id="badge-caixa">Caixa Fechado</span>
+  </div>
+  <div id="screen"></div>
+  
+  <div class="status-bar">
+    <div class="status-info-group">
+      <span>Operador: <span class="s-val" id="sb-op">—</span></span>
+      <span>Turno: <span class="s-val" id="sb-turno">—</span></span>
+      <span>Fundo: <span class="s-val" id="sb-fundo">—</span></span>
+      <span>Vendas: <span class="s-val" id="sb-vendas">0</span></span>
+    </div>
+    
+    <div style="display:flex; align-items:center; gap:14px; margin-left:auto;">
+      <div class="status-actions-group" id="sb-actions" style="display: none;">
+        <button onclick="abrirModalMovimentacao('SUPRIMENTO')" class="btn-status-mov" style="background: var(--warning); justify-content:space-between;">
+          <span><i class="ti ti-arrow-down-left"></i> Suprimento</span> <span class="kbd-badge">F8</span>
+        </button>
+        <button onclick="abrirModalMovimentacao('SANGRIA')" class="btn-status-mov" style="background: var(--danger); justify-content:space-between;">
+          <span><i class="ti ti-arrow-up-right"></i> Sangria</span> <span class="kbd-badge">F7</span>
+        </button>
+      </div>
+
+      <div id="sb-close-group" style="display: none;">
+        <button class="btn-footer-danger" id="btn-fechar-caixa-footer" style="justify-content:space-between;">
+          <span><i class="ti ti-lock" aria-hidden="true"></i> Fechar caixa</span> <span class="kbd-badge">F9</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ticket-impressao" style="display:none; width: 200px; font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #000;">
+    <div style="text-align:center; margin-bottom: 10px;">
+        <img src="/static/img/logo.png" alt="" style="width: 90px; height: auto; margin-bottom: 4px; filter: grayscale(100%) contrast(140%);"><br>
+        <strong>Empório Distribuidora</strong><br>
+        R. da Pedreira, 154 - Campo Pequeno, Colombo - PR, 83404-010<br>
+        Tel: (41) 99680-1240<br>
+         ____________________________
+    </div>
+    <div id="ticket-itens"></div>
+    <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
+        <strong id="ticket-total"></strong>
+    </div>
+    <div style="text-align:center; margin-top: 15px;">
+      seg a qui 10:00–22:00<br>
+      sexta e sábado 10:00–23:00<br>
+      domingo 10:00–18:00<br>
+      Obrigado pela preferência, volte sempre!<br>
+    </div>
+    <div style="text-align:center; margin-top: 14px; border-top: 1px dashed #000; padding-top: 10px; font-size: 10px;">
+        Sistema PDV desenvolvido por Felipe Brisola
+    </div>
+</div>
+
+<script>
+let state = {
+  caixaAberto:false,
+  cart:[],
+  caixaId:null,
+  faturamentoTurno: 0,
+  faturamentoDinheiro: 0,
+  faturamentoEletronico: 0, 
+  operador:"",
+  fundo:0,
+  turno:"",
+  payments:[],
+  totalVendas:0,
+  alert:null,
+  barcodeInput:"",
+  payMode:null,
+  payAmount:"",
+  ultimoAdicionado:null,
+  modoContingencia: false
+};
+
+let tipoMovimentacaoAtual = '';
+
+// Função necessária para o carrinho funcionar
+function adicionarAoCarrinho(produto) {
+    // 1. Verifica se o item já existe no carrinho (pelo código)
+    const itemExistente = state.cart.find(item => item.codigo_barras === produto.codigo_barras);
+    
+    if (itemExistente) {
+        // Apenas soma a quantidade, sem travar por estoque
+        itemExistente.qty += 1;
+    } else {
+        // Adiciona novo item ao carrinho
+        state.cart.push({
+            codigo_barras: produto.codigo_barras,
+            descricao: produto.descricao,
+            preco_venda: produto.preco_venda,
+            qty: 1
+        });
+    }
+
+    // Marca o item pra piscar na tabela (confirmação visual de que entrou)
+    state.ultimoAdicionado = produto.codigo_barras;
+    setTimeout(() => { state.ultimoAdicionado = null; }, 1200);
+
+    // Atualiza a tela
+    render(); 
+}
+
+function fmt(v) {
+    // Transforma qualquer coisa estranha ou nula em 0
+    let valor = parseFloat(v);
+    if (isNaN(valor)) valor = 0;
+    
+    return "R$ " + valor.toFixed(2).replace(".", ",");
+}
+
+function cartTotal(){return state.cart.reduce((a,i)=>a+i.preco_venda*i.qty,0)}
+function paidTotal(){return state.payments.reduce((a,p)=>a+p.amount,0)}
+function remaining(){return Math.max(0,cartTotal()-paidTotal())}
+
+function imprimirTicket() {
+    const itensDiv = document.getElementById("ticket-itens");
+    const totalDiv = document.getElementById("ticket-total");
+    
+    const agora = new Date().toLocaleString("pt-BR", { 
+        day: '2-digit', month: '2-digit', year: 'numeric', 
+        hour: '2-digit', minute: '2-digit' 
+    });
+
+    // Reset total para garantir que a tabela ocupe 100% sem margens externas
+    itensDiv.innerHTML = `
+       <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+            ${state.cart.map(item => `
+                <tr>
+                    <td style="text-align: left;">${item.qty}x ${item.descricao}</td>
+                    <td style="text-align: right;">${fmt(item.preco_venda)} x ${fmt(item.preco_venda * item.qty)}</td>
+                </tr>
+            `).join("")}
+        </table>
+    `;
+    
+    if (state.payments.length > 0) {
+        const total = cartTotal();
+        const paid = paidTotal();
+        const troco = paid > total ? paid - total : 0;
+
+        // Monta a string de pagamentos unidos por '___'
+        const pagamentosStr = state.payments
+            .map(p => `${p.mode} R$ ${fmt(p.amount).replace('R$ ', '')}`)
+            .join(" ___ ");
+
+        itensDiv.innerHTML += `
+            <div style="margin-top:10px; border-top: 1px dashed #000; padding-top: 5px; font-size: 11px;">
+                <div style="font-weight: bold; margin-bottom: 3px;">PAGAMENTOS:</div>
+                <div style="word-wrap: break-word;">${pagamentosStr}</div>
+                
+                ${troco > 0 ? `
+                <div style="font-weight: bold; margin-top: 5px;">
+                    TROCO: R$ ${fmt(troco).replace('R$ ', '')}
+                </div>` : ""}
+            </div>`;
+    }
+    
+    totalDiv.innerText = `TOTAL: ${fmt(cartTotal())}`;
+
+    setTimeout(() => {
+        window.print();
+        // Substitui 'inp-codigo' pelo ID real do seu input de código de barras
+        const campoCodigo = document.getElementById("inp-bc");
+        if (campoCodigo) {
+            campoCodigo.focus();
+        }
+
+    }, 250);
+}
+
+function render(){
+  const s=document.getElementById("screen");
+  
+  if(state.caixaAberto) {
+    if(state.modoContingencia) {
+      document.getElementById("badge-caixa").textContent = "Contingência Offline";
+      document.getElementById("badge-caixa").className = "badge-caixa badge-contingencia";
+    } else {
+      document.getElementById("badge-caixa").textContent = "Caixa Aberto";
+      document.getElementById("badge-caixa").className = "badge-caixa badge-aberto";
+    }
+  } else {
+    document.getElementById("badge-caixa").textContent = "Caixa Fechado";
+    document.getElementById("badge-caixa").className = "badge-caixa badge-fechado";
+  }
+
+  document.getElementById("sb-op").textContent=state.operador||"—";
+  document.getElementById("sb-turno").textContent=state.turno||"—";
+  document.getElementById("sb-fundo").textContent=state.fundo?fmt(state.fundo):"—";
+  document.getElementById("sb-vendas").textContent = "Nº Vendas: " + (state.totalVendas || 0);
+  
+  document.getElementById("sb-actions").style.display = state.caixaAberto ? "flex" : "none";
+  document.getElementById("sb-close-group").style.display = state.caixaAberto ? "block" : "none";
+
+  if(!state.caixaAberto){s.innerHTML=renderFechado();return;}
+  s.innerHTML=renderMain();
+  bindMain();
+
+  // --- LÓGICA DE FOCO INTELIGENTE (UX) ---
+  if (state.payMode) {
+      // Se um modo de pagamento foi clicado, foco no valor
+      const inpPay = document.getElementById("inp-payamt");
+      if (inpPay) { inpPay.focus(); inpPay.select(); }
+  } else if (state.cart.length === 0) {
+      // Se a tela estiver vazia, foco volta pro código
+      const inpBc = document.getElementById("inp-bc");
+      if (inpBc) inpBc.focus();
+  } else {
+      // Se tiver itens no carrinho, pula pra quantidade do último item adicionado
+      const qtyInputs = document.querySelectorAll("[data-qty-idx]");
+      if (qtyInputs.length > 0) {
+          const lastQtyInput = qtyInputs[qtyInputs.length - 1];
+          lastQtyInput.focus();
+          lastQtyInput.select();
+      }
+  }
+}
+
+function renderFechado(){
+  return `<div class="screen-fechado">
+    <div style="text-align:center"><i class="ti ti-lock" style="font-size:48px;color:var(--accent);margin-bottom:8px" aria-hidden="true"></i>
+    <p style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:8px">Abertura de Caixa</p>
+    <p style="font-size:14px;color:var(--text-secondary);margin-top:8px">Selecione o operador e informe o fundo</p></div>
+    <div class="abertura-card">
+      <div>
+        <div class="section-label">Operador</div>
+        <select id="inp-op" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('inp-fundo').focus();}" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:4px; font-size:14px; background:#fff; margin-bottom:10px;">
+          <option value="">Selecione um operador...</option>
+          <option value="Junior">Junior</option>
+          <option value="Sergio">Sergio</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <div class="section-label">Fundo de caixa (R$)</div>
+        <input id="inp-fundo" type="number" placeholder="0,00" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('btn-abrir').click();}">
+      </div>
+      <button class="btn btn-primary" id="btn-abrir" style="width:100%;justify-content:center;margin-top:8px;padding:14px"><i class="ti ti-lock-open" aria-hidden="true"></i> Abrir caixa</button>
+    </div>
+  </div>`;
+}
+
+function renderMain(){
+  const total=cartTotal();
+  const paid=paidTotal();
+  const rem=remaining();
+  const troco=paid>total?paid-total:0;
+  const alertHtml = state.alert ? 
+    `<div class="alert alert-${state.alert.type} alerta-sucesso">
+      <i class="ti ti-${state.alert.icon}" aria-hidden="true"></i> ${state.alert.msg}
+    </div>` : "";
+
+  const cartRows=state.cart.length===0
+    ?`<tr><td colspan="5" class="cart-empty">
+        <i class="ti ti-barcode" style="font-size:34px;display:block;margin:0 auto 10px;opacity:0.5" aria-hidden="true"></i>
+        <div style="font-weight:700;font-size:17px;color:var(--text-primary);margin-bottom:4px">Carrinho vazio</div>
+        <div style="font-size:14px">Bipe um produto ou digite o nome para começar <span class="kbd-badge" style="color:var(--text-secondary);border-color:var(--border);background:var(--light)">F4</span></div>
+      </td></tr>`
+    :state.cart.map((item,idx)=>`<tr${item.codigo_barras===state.ultimoAdicionado?' class="item-novo"':''}>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.descricao}</td>
+      <td>
+        <input type="number" class="inp-preco-carrinho" data-price-idx="${idx}" value="${item.preco_venda.toFixed(2)}" step="0.01" min="0">
+      </td>
+      <td>
+        <input type="number" class="inp-preco-carrinho" data-qty-idx="${idx}" value="${item.qty}" min="1" style="width:60px">
+      </td>
+      <td>${fmt(item.preco_venda*item.qty)}</td>
+      <td><button class="del-btn" data-act="del" data-idx="${idx}" style="color: var(--danger); font-weight: 900; font-size: 18px;" title="Remover item">X</button></td>
+    </tr>`).join("");
+
+  const payTags=state.payments.map((p,i)=>`<span class="pay-tag">${p.mode}${p.parcelas>1?` (${p.parcelas}x)`:''}: ${fmt(p.amount)}<button data-pi="${i}">×</button></span>`).join("");
+
+  const payIcons={Crédito:"ti-credit-card",Débito:"ti-credit-card",Pix:"ti-qrcode",Dinheiro:"ti-cash",VR:"ti-credit-card"};
+  const payBtns=["Crédito","Débito","Pix","Dinheiro","VR"].map(m=>`
+    <button class="pay-btn${state.payMode===m?" active":""}" data-pay="${m}">
+      <i class="ti ${payIcons[m]}" aria-hidden="true"></i>${m}
+    </button>`).join("");
+
+  return `<div class="main">
+    <div class="left">
+      <div>
+        <div class="section-label">Código de barras / Busca</div>
+        <div class="input-row">
+          <input id="inp-bc" type="text" placeholder="Leia o código ou digite o nome..." value="${state.barcodeInput}">
+          <button class="btn btn-primary" id="btn-add"><i class="ti ti-plus" aria-hidden="true"></i> Adicionar</button>
+        </div>
+        ${alertHtml}
+      </div>
+
+      <div class="cart-wrap" style="flex:1;overflow:auto">
+        <table class="cart-table">
+          <thead><tr>
+            <th>Produto</th><th>Preço (R$)</th><th>Qtd</th><th>Subtotal</th><th></th>
+          </tr></thead>
+          <tbody id="cart-body">${cartRows}</tbody>
+        </table>
+      </div>
+
+      <div class="total-row">
+        <span class="total-label">Total da venda</span>
+        <span class="total-value">${fmt(total)}</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div>
+        <div class="section-label">Modo de pagamento</div>
+        <div class="pay-methods">${payBtns}</div>
+      </div>
+
+      ${state.payMode?`<div>
+        <div class="section-label">Valor — ${state.payMode}</div>
+        <div class="pay-input-row" style="flex-wrap: wrap;">
+          <input id="inp-payamt" type="number" placeholder="${fmt(rem)}" value="${state.payAmount}" step="0.01">
+          ${state.payMode === "Crédito" ? `
+            <input id="inp-parcelas" type="number" value="1" min="1" max="12" style="width: 60px;" title="Parcelas">
+          ` : ""}
+          <button class="btn btn-primary" id="btn-addpay"><i class="ti ti-plus" aria-hidden="true"></i></button>
+        </div>
+        ${state.payMode === "Crédito" ? `<div id="txt-valor-parcela" style="font-size: 11px; color: var(--accent); margin-top: 4px; font-weight: bold; min-height: 15px;"></div>` : ""}
+      </div>`:""}
+
+      ${payTags?`<div><div class="section-label">Pagamentos registrados</div><div>${payTags}</div>
+        ${paid>0?`<div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--color-text-secondary);padding:10px 12px;border-radius:4px;background:${rem>0.01?'rgba(220,38,38,0.07)':'rgba(5,150,105,0.08)'};border:1px solid ${rem>0.01?'rgba(220,38,38,0.25)':'rgba(5,150,105,0.3)'}">
+          <span>Pago: <strong style="color:var(--color-text-primary)">${fmt(paid)}</strong></span>
+          <span style="text-align:right">${rem>0.01
+            ? `<span style="font-size:12px;color:var(--text-secondary);display:block;line-height:1">Falta</span><strong style="color:#A32D2D;font-size:22px">${fmt(rem)}</strong>`
+            : `<strong style="color:#0F6E56;font-size:16px"><i class="ti ti-check"></i> Pago por completo</strong>`}</span>
+        </div>`:""}
+        ${troco>0?`<div class="troco-info">Troco: <span class="troco-destaque">${fmt(troco)}</span></div>`:""}
+      </div>`:""}
+
+      <div style="flex:1"></div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-success" id="btn-finalizar" style="width:100%;justify-content:space-between;padding:12px;">
+          <span><i class="ti ti-check" aria-hidden="true"></i> Finalizar venda</span> <span class="kbd-badge">F6</span>
+        </button>
+        <button class="btn" id="btn-cancelar" style="width:100%;justify-content:center">
+          <i class="ti ti-x" aria-hidden="true"></i> Cancelar venda
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="modalMovimentacao" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div class="abertura-card" style="margin:auto; margin-top:15vh;">
+      <h3 id="movimentacaoTitulo" style="font-size:16px; font-weight:700; color:var(--text-primary); text-align:center;">Movimentação</h3>
+      <div>
+        <div class="section-label">Valor (R$)</div>
+        <input type="number" id="movimentacaoValor" step="0.01" min="0.01" placeholder="0,00" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('movimentacaoJustificativa').focus();}">
+      </div>
+      <div>
+        <div class="section-label">Justificativa</div>
+        <input type="text" id="movimentacaoJustificativa" placeholder="Motivo (Ex: Troco inicial)" onkeydown="if(event.key==='Enter'){event.preventDefault();setTimeout(()=>document.getElementById('btnConfirmarMov').focus(),0);}">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="fecharModalMovimentacao()" class="btn" style="flex:1; justify-content:center;">Cancelar</button>
+        <button id="btnConfirmarMov" onclick="salvarMovimentacao()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalCadastroRapido" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div class="abertura-card" style="margin:auto; margin-top:15vh;">
+      <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); text-align:center;">Produto não encontrado — cadastro rápido</h3>
+      <div>
+        <div class="section-label">Código de barras</div>
+        <input type="text" id="cadastroRapidoCodigo" readonly style="background:var(--light); color:var(--text-secondary); cursor:not-allowed;">
+      </div>
+      <div>
+        <div class="section-label">Descrição</div>
+        <input type="text" id="cadastroRapidoDescricao" placeholder="Nome do produto" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('cadastroRapidoPreco').focus();}">
+      </div>
+      <div>
+        <div class="section-label">Preço de venda (R$)</div>
+        <input type="number" id="cadastroRapidoPreco" step="0.01" min="0" placeholder="0,00" onkeydown="if(event.key==='Enter'){event.preventDefault(); salvarCadastroRapido();}">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="fecharCadastroRapido()" class="btn" style="flex:1; justify-content:center;">Cancelar</button>
+        <button onclick="salvarCadastroRapido()" class="btn btn-success" style="flex:1; justify-content:center;">Cadastrar e adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalFechamento" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div class="abertura-card" style="margin:auto; margin-top:10vh; max-height:80vh; overflow-y:auto;">
+      <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); text-align:center; margin-bottom:6px;">Resumo de Fechamento de Turno</h3>
+      <div id="resumoFechamentoConteudo"></div>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button onclick="enviarFechamentoWhatsApp()" class="btn" style="flex:1; justify-content:center; background:#25D366; color:#fff;">
+          <i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WhatsApp
+        </button>
+        <button onclick="imprimirFechamento()" class="btn" style="flex:1; justify-content:center;">
+          <i class="ti ti-printer" aria-hidden="true"></i> Imprimir
+        </button>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button onclick="fecharModalFechamento()" class="btn" style="flex:1; justify-content:center;">Cancelar</button>
+        <button id="btnConfirmarFechamento" onclick="confirmarFechamentoCaixa()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar Fechamento</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalEscolhaProduto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div class="abertura-card" style="margin:auto; margin-top:12vh; max-width:520px; max-height:70vh;">
+      <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); text-align:center;">Vários produtos encontrados</h3>
+      <div style="font-size:13px; color:var(--text-secondary); text-align:center; margin-top:-6px;">Use ↑ ↓ e Enter para escolher</div>
+      <div id="listaEscolhaProduto" style="display:flex; flex-direction:column; gap:6px; overflow-y:auto; max-height:44vh;"></div>
+      <button onclick="fecharModalEscolhaProduto()" class="btn" style="width:100%; justify-content:center;">Cancelar (Esc)</button>
+    </div>
+  </div>
+
+  <div id="modalTroco" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.65); z-index:1000; align-items:center; justify-content:center;">
+    <div class="abertura-card" style="margin:auto; margin-top:15vh; text-align:center; max-width:420px;">
+      <div style="font-size:16px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Troco a devolver</div>
+      <div id="valorTrocoDestaque" style="font-size:56px; font-weight:800; color:var(--success); margin:10px 0; line-height:1.1;">R$ 0,00</div>
+      <div style="font-size:14px; color:var(--text-secondary); margin-bottom:6px;">Confira o troco antes de continuar. O cupom será impresso em seguida.</div>
+      <button id="btnConfirmarTroco" onclick="confirmarTroco()" class="btn btn-success" style="width:100%; justify-content:center; padding:16px; font-size:18px;">
+        <i class="ti ti-check" aria-hidden="true"></i> Troco entregue — Imprimir cupom
+      </button>
+    </div>
+  </div>`;
+}
+
+async function searchProduct(codigo) {
+    const termo = String(codigo).trim();
+    if (!termo) return;
+
+    try {
+        const resposta = await API.produtos.buscarTexto(termo);
+
+        if (!resposta.sucesso) {
+            showAlert("danger", "alert-circle", resposta.mensagem || "Erro na busca");
+            return;
+        }
+
+        if (resposta.total === 1) {
+            // Achou exatamente um: adiciona direto (comportamento de leitor de código)
+            adicionarProdutoEFocaQtd(resposta.resultados[0]);
+            return;
+        }
+
+        if (resposta.total > 1) {
+            // Vários produtos batem com o nome digitado: operador escolhe qual
+            abrirModalEscolhaProduto(resposta.resultados);
+            return;
+        }
+
+        // Nada encontrado
+        if (resposta.parece_codigo) {
+            // Só oferece cadastro rápido quando é de fato um código de barras (só dígitos).
+            // Evita cadastrar produto com código de barras "Agua" quando o operador digita um nome.
+            abrirCadastroRapido(termo);
+        } else {
+            showAlert("warn", "alert-circle", `Nenhum produto encontrado com "${termo}"`, 4000);
+            const inpBc = document.getElementById('inp-bc');
+            if (inpBc) inpBc.select();
+        }
+    } catch (error) {
+        console.error("Erro na busca:", error);
+        showAlert("danger", "alert-triangle", "Falha de comunicação na busca");
+    }
+}
+
+function adicionarProdutoEFocaQtd(produto) {
+    adicionarAoCarrinho({
+        codigo_barras: produto.codigo_barras,
+        descricao: produto.descricao,
+        preco_venda: produto.preco_venda
+    });
+    state.barcodeInput = '';
+    const inpBc = document.getElementById('inp-bc');
+    if (inpBc) inpBc.value = '';
+
+    // Navegação por teclado: já encontrou o produto, pula direto pro campo de quantidade
+    const idx = state.cart.findIndex(item => item.codigo_barras === produto.codigo_barras);
+    if (idx > -1) {
+        const inputQtd = document.querySelector(`[data-qty-idx="${idx}"]`);
+        if (inputQtd) { inputQtd.focus(); inputQtd.select(); }
+    }
+}
+
+let resultadosBuscaAtual = [];
+
+function abrirModalEscolhaProduto(resultados) {
+    resultadosBuscaAtual = resultados;
+    const lista = document.getElementById('listaEscolhaProduto');
+
+    lista.innerHTML = resultados.map((p, i) => `
+        <button class="escolha-item" data-escolha="${i}">
+            <span style="text-align:left;">
+                <strong>${p.descricao}</strong><br>
+                <span style="font-size:13px; color:var(--text-secondary);">${p.codigo_barras} · Estoque: ${p.estoque_atual}</span>
+            </span>
+            <strong style="color:var(--success); white-space:nowrap;">${fmt(p.preco_venda)}</strong>
+        </button>
+    `).join('');
+
+    lista.querySelectorAll('[data-escolha]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const escolhido = resultadosBuscaAtual[parseInt(btn.dataset.escolha)];
+            fecharModalEscolhaProduto();
+            adicionarProdutoEFocaQtd(escolhido);
+        });
+    });
+
+    // Setas navegam entre os resultados, Enter escolhe
+    lista.addEventListener('keydown', navegarEscolhaProduto);
+
+    document.getElementById('modalEscolhaProduto').style.display = 'flex';
+    setTimeout(() => {
+        const primeiro = lista.querySelector('[data-escolha]');
+        if (primeiro) primeiro.focus();
+    }, 50);
+}
+
+function navegarEscolhaProduto(e) {
+    const itens = Array.from(document.querySelectorAll('#listaEscolhaProduto [data-escolha]'));
+    const atual = itens.indexOf(document.activeElement);
+    if (atual === -1) return;
+
+    let alvo = -1;
+    if (e.key === 'ArrowDown') alvo = (atual + 1) % itens.length;
+    else if (e.key === 'ArrowUp') alvo = (atual - 1 + itens.length) % itens.length;
+    else return;
+
+    e.preventDefault();
+    itens[alvo].focus();
+}
+
+function fecharModalEscolhaProduto() {
+    document.getElementById('modalEscolhaProduto').style.display = 'none';
+    resultadosBuscaAtual = [];
+    const inpBc = document.getElementById('inp-bc');
+    if (inpBc) { inpBc.value = ''; inpBc.focus(); }
+}
+
+let codigoCadastroRapido = '';
+
+function abrirCadastroRapido(codigo) {
+    codigoCadastroRapido = codigo;
+    document.getElementById('cadastroRapidoCodigo').value = codigo;
+    document.getElementById('cadastroRapidoDescricao').value = '';
+    document.getElementById('cadastroRapidoPreco').value = '';
+    document.getElementById('modalCadastroRapido').style.display = 'flex';
+    document.getElementById('cadastroRapidoDescricao').focus();
+}
+
+function fecharCadastroRapido() {
+    document.getElementById('modalCadastroRapido').style.display = 'none';
+    codigoCadastroRapido = '';
+    state.barcodeInput = '';
+    const inpBc = document.getElementById('inp-bc');
+    if (inpBc) { inpBc.value = ''; inpBc.focus(); }
+}
+
+async function salvarCadastroRapido() {
+    const descricao = document.getElementById('cadastroRapidoDescricao').value.trim();
+    const preco = parseFloat(document.getElementById('cadastroRapidoPreco').value);
+
+    if (!descricao) {
+        alert("Informe a descrição do produto.");
+        document.getElementById('cadastroRapidoDescricao').focus();
+        return;
+    }
+    if (isNaN(preco) || preco < 0) {
+        alert("Informe um preço válido.");
+        document.getElementById('cadastroRapidoPreco').focus();
+        return;
+    }
+
+    try {
+        // Cadastro rápido: sem estoque atual/mínimo, entra zerado (RF04).
+        const resposta = await API.estoque.cadastrar({
+            codigo_barras: codigoCadastroRapido,
+            descricao: descricao,
+            preco_venda: preco,
+            estoque_minimo: 0,
+            estoque_atual: 0
+        });
+
+        if (resposta.sucesso) {
+            document.getElementById('modalCadastroRapido').style.display = 'none';
+            adicionarAoCarrinho({
+                codigo_barras: codigoCadastroRapido,
+                descricao: descricao,
+                preco_venda: preco
+            });
+            state.barcodeInput = '';
+            const inpBc = document.getElementById('inp-bc');
+            if (inpBc) inpBc.value = '';
+            codigoCadastroRapido = '';
+        } else {
+            alert(resposta.mensagem || "Não foi possível cadastrar o produto.");
+        }
+    } catch (error) {
+        console.error("Erro no cadastro rápido:", error);
+        alert("Falha de comunicação ao cadastrar o produto.");
+    }
+}
+
+function showAlert(type,icon,msg,ms=3000){
+  state.alert={type,icon,msg};
+  render();
+  if(ms>0)setTimeout(()=>{state.alert=null;render();},ms);
+}
+
+async function processarFinalizacaoVenda() {
+    if (!state.cart.length) {
+        showAlert("warn", "alert-circle", "O carrinho está vazio");
+        return;
+    }
+
+    if (!state.payments.length) {
+        showAlert("warn", "alert-circle", "Adicione ao menos uma forma de pagamento");
+        return;
+    }
+
+    if (remaining() > 0.01) {
+        showAlert("warn", "alert-circle", `Faltam ${fmt(remaining())} para cobrir o total`);
+        return;
+    }
+
+    // Envia o detalhamento completo do pagamento fracionado (Pix + Dinheiro etc.),
+    // não só o primeiro método — é o que o back-end precisa pra faturamento por método.
+    const payload = {
+        carrinho: state.cart,
+        operador: state.operador,
+        pagamentos: state.payments.map(p => ({ forma_pagamento: p.mode, valor: p.amount }))
+    };
+
+    try {
+        const resposta = await API.vendas.registrar(payload); // Usando a API centralizada
+
+        if (resposta.sucesso) {
+            // Calcula o troco ANTES de limpar o carrinho — senão o valor se perde.
+            const troco = paidTotal() - cartTotal();
+
+            if (troco > 0.01) {
+                // Há troco: mostra em destaque e só imprime quando o operador confirmar.
+                abrirModalTroco(troco);
+            } else {
+                imprimirTicket();
+                limparVendaConcluida();
+                showAlert("success", "check", "Venda finalizada!", 4000);
+                iniciarSistema();
+            }
+        } else {
+            showAlert("danger", "alert-circle", "Erro ao salvar: " + resposta.mensagem);
+        }
+    } catch (error) {
+        console.error("Erro na comunicação:", error);
+        showAlert("danger", "alert-triangle", "Falha de comunicação!");
+    }
+}
+
+function abrirModalTroco(troco) {
+    document.getElementById('valorTrocoDestaque').textContent = fmt(troco);
+    document.getElementById('modalTroco').style.display = 'flex';
+    // Enter confirma direto, sem precisar do mouse
+    setTimeout(() => document.getElementById('btnConfirmarTroco').focus(), 50);
+}
+
+function confirmarTroco() {
+    document.getElementById('modalTroco').style.display = 'none';
+    imprimirTicket();
+    limparVendaConcluida();
+    showAlert("success", "check", "Venda finalizada!", 4000);
+    iniciarSistema();
+}
+
+function limparVendaConcluida() {
+  state.cart = [];
+  state.payments = [];
+  state.payMode = null;
+  state.barcodeInput = "";
+  render();
+}
+
+
+
+async function sincronizarVendasPendentes() {
+  let filaContingencia = JSON.parse(localStorage.getItem("vendas_contingencia")) || [];
+  if (filaContingencia.length === 0) {
+    if (state.modoContingencia) {
+      state.modoContingencia = false;
+      render();
+    }
+    return;
+  }
+
+  const proximaVenda = filaContingencia[0];
+
+  try {
+    const dados = await API.vendas.registrar(proximaVenda);
+    if (dados.sucesso) {
+      filaContingencia.shift();
+      localStorage.setItem("vendas_contingencia", JSON.stringify(filaContingencia));
+      console.log("Venda sincronizada. Restantes: " + filaContingencia.length);
+      
+      if(filaContingencia.length === 0) {
+        state.modoContingencia = false;
+        showAlert("success", "cloud-upload", "Todas as vendas offline foram sincronizadas!");
+      } else {
+        sincronizarVendasPendentes();
+      }
+    }
+  } catch (err) {
+    console.log("Servidor offline. Aguardando...");
+  }
+}
+
+setInterval(sincronizarVendasPendentes, 15000);
+
+// Variável de controle para impedir cliques múltiplos
+let fechamentoEmAndamento = false;
+
+let dadosFechamentoPendente = null;
+
+function processarFechamentoCaixa(e) {
+  if (e) e.preventDefault();
+  if (fechamentoEmAndamento) return;
+
+  const fundo = parseFloat(state.fundo) || 0;
+  const fatDinheiro = parseFloat(state.faturamentoDinheiro) || 0;
+  const fatEletronico = parseFloat(state.faturamentoEletronico) || 0;
+  const lucroTotalTurno = parseFloat(state.faturamentoTurno) || 0;
+  const suprimentos = parseFloat(state.suprimentos) || 0;
+  const sangrias = parseFloat(state.sangrias) || 0;
+  const dinheiroFisicoEsperado = fundo + fatDinheiro + suprimentos - sangrias;
+
+  dadosFechamentoPendente = {
+    dinheiroFisicoEsperado,
+    operador: state.operador,
+    fundo,
+    fatDinheiro,
+    fatEletronico,
+    lucroTotalTurno,
+    suprimentos,
+    sangrias,
+    numeroVendas: state.totalVendas || 0,
+    turno: state.turno || ''
+  };
+
+  const linha = (label, valor, destaque) =>
+    `<div style="display:flex; justify-content:space-between; padding:6px 0; ${destaque ? 'font-weight:700; font-size:16px;' : 'font-size:14px; color:var(--text-secondary);'}">
+       <span>${label}</span><span>${fmt(valor)}</span>
+     </div>`;
+
+  document.getElementById('resumoFechamentoConteudo').innerHTML = `
+    <div style="font-size:13px; color:var(--text-secondary); margin-bottom:4px;">Operador: <strong style="color:var(--text-primary);">${state.operador}</strong></div>
+    ${linha('Fundo inicial', fundo)}
+    <hr style="border:none; border-top:1px solid var(--border); margin:6px 0;">
+    ${linha('Faturamento total do turno', lucroTotalTurno)}
+    ${linha('— Meios eletrônicos (Pix/Cartões)', fatEletronico)}
+    ${linha('— Dinheiro em espécie', fatDinheiro)}
+    ${linha('Suprimentos', suprimentos)}
+    ${linha('Sangrias', -sangrias)}
+    <hr style="border:none; border-top:1px solid var(--border); margin:6px 0;">
+    ${linha('Saldo esperado na gaveta', dinheiroFisicoEsperado, true)}
+    <div style="font-size:11px; color:var(--text-secondary); margin-top:6px;">Inclui: fundo + vendas em espécie + suprimentos − sangrias</div>
+  `;
+
+  document.getElementById('modalFechamento').style.display = 'flex';
+  // Enter confirma direto — botão principal já vem focado
+  setTimeout(() => {
+    const btn = document.getElementById('btnConfirmarFechamento');
+    if (btn) btn.focus();
+  }, 50);
+}
+
+function montarTextoFechamento() {
+  const d = dadosFechamentoPendente;
+  if (!d) return '';
+  const data = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  let txt = `📊 FECHAMENTO DE CAIXA — Distribuidora Empório\n`;
+  txt += `${data}\n\n`;
+  txt += `👤 Operador: ${d.operador}\n`;
+  txt += `🕐 Turno iniciado: ${d.turno}\n`;
+  txt += `🧾 Nº de vendas: ${d.numeroVendas}\n\n`;
+  txt += `💰 Fundo inicial: ${fmt(d.fundo)}\n`;
+  txt += `🛒 Faturamento do turno: ${fmt(d.lucroTotalTurno)}\n`;
+  txt += `💳 Meios eletrônicos: ${fmt(d.fatEletronico)}\n`;
+  txt += `💵 Dinheiro em espécie: ${fmt(d.fatDinheiro)}\n`;
+  txt += `📥 Suprimentos: ${fmt(d.suprimentos)}\n`;
+  txt += `📤 Sangrias: ${fmt(d.sangrias)}\n\n`;
+  txt += `💰 SALDO ESPERADO NA GAVETA: ${fmt(d.dinheiroFisicoEsperado)}\n`;
+  txt += `(fundo + vendas em espécie + suprimentos − sangrias)`;
+  return txt;
+}
+
+function enviarFechamentoWhatsApp() {
+  const txt = montarTextoFechamento();
+  if (!txt) return;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+}
+
+function imprimirFechamento() {
+  const d = dadosFechamentoPendente;
+  if (!d) return;
+  const data = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  const linha = (label, valor, forte) =>
+    `<tr${forte ? ' class="forte"' : ''}><td>${label}</td><td style="text-align:right">${fmt(valor)}</td></tr>`;
+
+  const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
+<title>Fechamento de Caixa — ${data}</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; color:#111; padding:24px; font-size:13px; }
+  header { display:flex; align-items:center; gap:14px; border-bottom:3px solid #059669; padding-bottom:12px; margin-bottom:16px; }
+  header img { height:60px; }
+  h1 { font-size:18px; margin:0; }
+  .sub { color:#555; font-size:12px; margin-top:3px; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  td { padding:7px 4px; border-bottom:1px solid #eee; }
+  .forte td { font-size:16px; font-weight:bold; background:#f0fdf9; border-top:2px solid #059669; }
+  .obs { font-size:11px; color:#777; margin-top:6px; }
+  .assinatura { margin-top:50px; border-top:1px solid #333; width:280px; padding-top:5px; font-size:11px; }
+  @media print { body { padding:0; } }
+</style></head><body>
+{% if demo_mode %}
+<div style="background:#7c3aed;color:#fff;text-align:center;padding:8px;font-size:14px;font-family:sans-serif;">
+  🔴 Ambiente de demonstração pública — dados fictícios, reiniciados a cada poucas horas.
+</div>
+{% endif %}
+  <header>
+    <img src="/static/img/logo.png" alt="">
+    <div>
+      <h1>Fechamento de Caixa</h1>
+      <div class="sub">Distribuidora Empório</div>
+      <div class="sub">${data}</div>
+    </div>
+  </header>
+  <table>
+    <tr><td>Operador</td><td style="text-align:right"><strong>${d.operador}</strong></td></tr>
+    <tr><td>Turno iniciado</td><td style="text-align:right">${d.turno}</td></tr>
+    <tr><td>Nº de vendas</td><td style="text-align:right">${d.numeroVendas}</td></tr>
+    ${linha('Fundo inicial', d.fundo)}
+    ${linha('Faturamento total do turno', d.lucroTotalTurno)}
+    ${linha('— Meios eletrônicos (Pix/Cartões)', d.fatEletronico)}
+    ${linha('— Dinheiro em espécie', d.fatDinheiro)}
+    ${linha('Suprimentos', d.suprimentos)}
+    ${linha('Sangrias', d.sangrias)}
+    ${linha('Saldo esperado na gaveta', d.dinheiroFisicoEsperado, true)}
+  </table>
+  <div class="obs">Saldo esperado = fundo + vendas em espécie + suprimentos − sangrias</div>
+  <div class="assinatura">Assinatura do operador</div>
+</body></html>`;
+
+  const janela = window.open('', '_blank');
+  if (!janela) { alert("O navegador bloqueou a janela de impressão. Libere os pop-ups para este site."); return; }
+  janela.document.write(html);
+  janela.document.close();
+  janela.onload = () => { janela.focus(); janela.print(); };
+}
+
+function fecharModalFechamento() {
+  document.getElementById('modalFechamento').style.display = 'none';
+  dadosFechamentoPendente = null;
+}
+
+async function confirmarFechamentoCaixa() {
+  if (!dadosFechamentoPendente || fechamentoEmAndamento) return;
+  fechamentoEmAndamento = true;
+
+  try {
+    const dados = await API.caixa.fechar({
+      operador: PDV_STATE.getOperador(),
+      valor_fechamento: dadosFechamentoPendente.dinheiroFisicoEsperado
+    });
+
+    if (dados.sucesso) {
+      document.getElementById('modalFechamento').style.display = 'none';
+      if (dados.backup_ok) {
+        alert("Caixa fechado com sucesso!\n\n✔ Backup automático salvo em:\n" + dados.backup_arquivo);
+      } else {
+        alert("Caixa fechado com sucesso!\n\n⚠ ATENÇÃO: o backup automático falhou. Avise o responsável pelo sistema.");
+      }
+      window.location.reload();
+    } else {
+      alert("Erro ao fechar caixa: " + dados.mensagem);
+      fechamentoEmAndamento = false;
+    }
+  } catch (error) {
+    alert("Erro de comunicação.");
+    fechamentoEmAndamento = false;
+  }
+}
+
+function bindMain(){
+
+  const inp=document.getElementById("inp-bc");
+  if(inp){
+    inp.addEventListener("keydown",e=>{
+      if(e.key!=="Enter") return;
+      e.preventDefault();
+
+      const termo = e.target.value.trim();
+      if (termo === "") {
+        // Enter com o campo vazio = operador terminou de bipar itens.
+        // Só PRÉ-SELECIONA (foca) a forma de pagamento; o próximo Enter é que confirma.
+        if (state.cart.length === 0) return; // carrinho vazio: não tem pra onde ir ainda
+        const primeiroPay = document.querySelector(".pay-btn");
+        if (primeiroPay) primeiroPay.focus();
+        return;
+      }
+
+      searchProduct(termo);
+    });
+    inp.addEventListener("input",e=>{state.barcodeInput=e.target.value;});
+  }
+  const btnAdd=document.getElementById("btn-add");
+  if(btnAdd)btnAdd.addEventListener("click",()=>searchProduct(state.barcodeInput));
+
+  document.querySelectorAll("[data-price-idx], [data-qty-idx]").forEach(input => {
+    input.addEventListener("change", e => {
+      const idx = parseInt(e.target.dataset.priceIdx !== undefined ? e.target.dataset.priceIdx : e.target.dataset.qtyIdx);
+      const val = parseFloat(e.target.value);
+      
+      if (!isNaN(val) && val >= 0) {
+        if(e.target.dataset.priceIdx !== undefined) {
+          state.cart[idx].preco_venda = val;
+        } else {
+          state.cart[idx].qty = val;
+        }
+      }
+      render();
+    });
+    input.addEventListener("keydown", e => {
+      if (e.key !== "Enter") return;
+      // preventDefault é essencial: sem ele, o keyup deste mesmo Enter cai no botão
+      // que acabou de receber foco e o navegador dispara um clique automático nele.
+      e.preventDefault();
+
+      const idx = parseInt(e.target.dataset.priceIdx !== undefined ? e.target.dataset.priceIdx : e.target.dataset.qtyIdx);
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val) && val >= 0) {
+        if (e.target.dataset.priceIdx !== undefined) state.cart[idx].preco_venda = val;
+        else state.cart[idx].qty = val;
+      }
+
+      const eraQtd = e.target.dataset.qtyIdx !== undefined;
+      render();
+
+      if (eraQtd) {
+        // Volta pro campo de código, pronto pra bipar o próximo item em sequência.
+        // Só quando o operador der Enter com o campo VAZIO é que avança pro pagamento
+        // (ver o handler do "inp-bc" acima).
+        setTimeout(() => {
+          const campoCodigo = document.getElementById("inp-bc");
+          if (campoCodigo) campoCodigo.focus();
+        }, 0);
+      }
+    });
+  });
+
+  // Navegação por setas entre os botões de forma de pagamento (grid 2 colunas)
+  const payMethodsBox = document.querySelector(".pay-methods");
+  if (payMethodsBox) {
+    payMethodsBox.addEventListener("keydown", e => {
+      const botoes = Array.from(payMethodsBox.querySelectorAll(".pay-btn"));
+      const atual = botoes.indexOf(document.activeElement);
+      if (atual === -1) return;
+
+      let alvo = -1;
+      if (e.key === "ArrowRight") alvo = (atual + 1) % botoes.length;
+      else if (e.key === "ArrowLeft") alvo = (atual - 1 + botoes.length) % botoes.length;
+      else if (e.key === "ArrowDown") alvo = (atual + 2) % botoes.length;
+      else if (e.key === "ArrowUp") alvo = (atual - 2 + botoes.length) % botoes.length;
+      else return;
+
+      e.preventDefault();
+      botoes[alvo].focus();
+    });
+  }
+
+  // Lógica de Exclusão (Refatorada para evitar bugs de clique no ícone)
+  document.querySelectorAll("[data-act]").forEach(b=>{
+    b.addEventListener("click", function() {
+      const idx = parseInt(this.dataset.idx);
+      if(this.dataset.act === "inc") state.cart[idx].qty++;
+      else if(this.dataset.act === "dec"){
+          state.cart[idx].qty--;
+          if(state.cart[idx].qty <= 0) state.cart.splice(idx, 1);
+      }
+      else if(this.dataset.act === "del") state.cart.splice(idx, 1); // Exclusão forçada
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-pay]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      state.payMode=b.dataset.pay;
+      state.payAmount=remaining().toFixed(2); // pré-preenche com o que falta pagar
+      render();
+      const inpAmt = document.getElementById("inp-payamt");
+      if (inpAmt) { inpAmt.focus(); inpAmt.select(); }
+    });
+  });
+
+  const btnAddPay=document.getElementById("btn-addpay");
+  if(btnAddPay)btnAddPay.addEventListener("click",()=>{
+    let amt=parseFloat(document.getElementById("inp-payamt").value)||remaining();
+    
+    if(amt<=0){
+        showAlert("warn","alert-circle","Informe um valor válido");
+        return;
+    }
+
+    // NOVA LÓGICA: Travar valor a mais para pagamentos eletrônicos (tudo que não for Dinheiro)
+    if(state.payMode !== "Dinheiro" && amt > remaining()){
+        showAlert("warn","alert-triangle",`Pagamento em ${state.payMode} não pode gerar troco. Máximo: ${fmt(remaining())}`);
+        document.getElementById("inp-payamt").value = remaining().toFixed(2); // Auto-corrige para o valor exato no input
+        return; // Impede que adicione no carrinho
+    }
+
+    state.payments.push({mode:state.payMode,amount:parseFloat(amt.toFixed(2))});
+    state.payMode=null;state.payAmount="";render();
+
+    // Navegação por teclado: pagamento completo -> foco no Finalizar; senão volta pras
+    // formas de pagamento (setTimeout garante que o DOM recriado pelo render já existe).
+    setTimeout(() => {
+      if (remaining() <= 0.01) {
+        const bFin = document.getElementById("btn-finalizar");
+        if (bFin) bFin.focus();
+      } else {
+        const primeiroPay = document.querySelector(".pay-btn");
+        if (primeiroPay) primeiroPay.focus();
+      }
+    }, 0);
+  });
+
+ 
+
+  const inp2=document.getElementById("inp-payamt");
+  if(inp2){
+    inp2.addEventListener("keydown",e=>{
+      if(e.key!=="Enter") return;
+      // preventDefault é essencial: sem ele o Enter "vaza" e dispara clique no botão
+      // de forma de pagamento que receber o foco logo em seguida.
+      e.preventDefault();
+      if(btnAddPay) btnAddPay.click();
+    });
+    inp2.addEventListener("input",e=>{state.payAmount=e.target.value;});
+  }
+
+  document.querySelectorAll("[data-pi]").forEach(b=>{
+    b.addEventListener("click",()=>{state.payments.splice(parseInt(b.dataset.pi),1);render();});
+  });
+
+  const btnFin = document.getElementById("btn-finalizar");
+  if (btnFin) {
+  btnFin.addEventListener("click", processarFinalizacaoVenda);
+  }
+
+  const btnFecharFooter = document.getElementById("btn-fechar-caixa-footer");
+  if (btnFecharFooter) {
+    btnFecharFooter.addEventListener("click", processarFechamentoCaixa);
+  }
+
+  const btnCanc=document.getElementById("btn-cancelar");
+  if(btnCanc)btnCanc.addEventListener("click",()=>{
+    state.cart=[];state.payments=[];state.payMode=null;state.barcodeInput="";state.alert=null;render();
+  });
+
+  // Adicionei aqui>>
+  // Adicionar dentro da função bindMain() ou logo após ela
+const inpPayAmt = document.getElementById("inp-payamt");
+const inpParcelas = document.getElementById("inp-parcelas");
+const txtParc = document.getElementById("txt-valor-parcela");
+
+const calcParcela = () => {
+    if(!inpPayAmt || !inpParcelas || !txtParc) return;
+    const total = parseFloat(inpPayAmt.value) || remaining();
+    const n = parseInt(inpParcelas.value) || 1;
+    txtParc.textContent = n > 1 ? `Valor da parcela: ${fmt(total / n)}` : "";
+};
+
+if(inpPayAmt) inpPayAmt.addEventListener("input", calcParcela);
+if(inpParcelas) inpParcelas.addEventListener("input", calcParcela);
+}
+
+function abrirModalMovimentacao(tipo) {
+    if (!state.caixaAberto) {
+        alert("Abra o caixa antes de realizar movimentações.");
+        return;
+    }
+    tipoMovimentacaoAtual = tipo;
+    document.getElementById('movimentacaoTitulo').innerText = tipo === 'SUPRIMENTO' ? 'Registrar Suprimento (Entrada)' : 'Registrar Sangria (Retirada)';
+    document.getElementById('movimentacaoValor').value = '';
+    document.getElementById('movimentacaoJustificativa').value = '';
+    document.getElementById('modalMovimentacao').style.display = 'flex';
+    // Foco direto no campo de valor — o operador já pode digitar sem usar o mouse
+    setTimeout(() => document.getElementById('movimentacaoValor').focus(), 50);
+}
+
+function fecharModalMovimentacao() {
+    document.getElementById('modalMovimentacao').style.display = 'none';
+}
+
+async function salvarMovimentacao() {
+    const valor = parseFloat(document.getElementById('movimentacaoValor').value);
+    const justificativa = document.getElementById('movimentacaoJustificativa').value;
+    const tipo = tipoMovimentacaoAtual;
+
+    if (!valor || valor <= 0) {
+        alert("Valor inválido!");
+        return;
+    }
+
+    const dados = { valor, operador: PDV_STATE.getOperador(), justificativa };
+
+    try {
+        let resposta;
+        if (tipo === 'SUPRIMENTO') {
+            resposta = await API.fluxo.suprimento(dados);
+        } else {
+            resposta = await API.fluxo.sangria(dados);
+        }
+        if (resposta.sucesso) {
+            alert(tipo + " registrada com sucesso!");
+            fecharModalMovimentacao();
+            iniciarSistema();
+        } else {
+            alert("Erro: " + resposta.mensagem);
+        }
+    } catch (e) {
+        console.error("Erro na movimentação:", e);
+        alert("Falha de comunicação.");
+    }
+}
+
+document.getElementById("screen").addEventListener("click", async e => {
+  const btnAbrir = document.getElementById("btn-abrir");
+  
+  if (e.target === btnAbrir || (btnAbrir && btnAbrir.contains(e.target))) {
+    const op = document.getElementById("inp-op").value;
+    const fundo = parseFloat(document.getElementById("inp-fundo").value) || 0;
+    
+    if (!op) {
+      alert("Informe o nome do operador.");
+      return;
+    }
+    
+    try {
+      // Em vez de um 'fetch' gigante, usamos API.caixa
+      const dados = await API.caixa.abrir({ operador: op, fundo_inicial: fundo });
+
+      if (dados.sucesso) {
+        PDV_STATE.setOperador(op); // Salva o nome do operador no localStorage via nosso novo estado
+        state.caixaId = dados.caixa_id;
+        state.operador = op;
+        state.fundo = fundo;
+        state.faturamentoDinheiro = 0;
+        state.faturamentoEletronico = 0;
+        state.faturamentoTurno = 0;
+        state.turno = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        state.caixaAberto = true;
+        
+        render();
+        showAlert("success", "lock-open", "Caixa registrado e iniciado com sucesso!");
+      } else {
+        alert("Erro ao abrir caixa: " + dados.mensagem);
+      }
+    } catch (error) {
+      console.error("Erro na requisição de abertura:", error);
+      alert("Erro de comunicação com o servidor ao abrir o caixa.");
+    }
+  }
+});
+
+function formatarHora(dataHoraSQL) {
+    // "2026-07-10 20:04:12" -> "20:04"
+    if (!dataHoraSQL) return "";
+    const partes = dataHoraSQL.split(" ");
+    return partes.length > 1 ? partes[1].slice(0, 5) : "";
+}
+
+async function iniciarSistema() {
+    try {
+        const data = await API.caixa.getDadosAtuais();
+
+        if (data.aberto) {
+            state.caixaAberto = true;
+            state.operador = data.operador;
+            state.fundo = data.fundo;
+            state.turno = formatarHora(data.data_abertura);   
+            state.faturamentoTurno = data.faturamento_turno;
+            state.faturamentoDinheiro = data.faturamento_dinheiro;
+            state.faturamentoEletronico = data.faturamento_eletronico;
+            state.totalVendas = data.numero_vendas || 0;
+            state.suprimentos = data.suprimentos || 0;        
+            state.sangrias = data.sangrias || 0;                
+        } else {
+            state.caixaAberto = false;
+        }
+    } catch (e) {
+        console.error("Falha ao sincronizar caixa:", e);
+        state.caixaAberto = false;
+    }
+    render();
+}
+
+// --- Atalhos de teclado desta tela (chamados de pdv_base.js) ---
+function atalhoF4() {
+    const inp = document.getElementById('inp-bc');
+    if (inp) { inp.focus(); inp.select(); }
+}
+function atalhoF6() {
+    if (typeof processarFinalizacaoVenda === 'function') processarFinalizacaoVenda();
+}
+function atalhoF7() {
+    if (state.caixaAberto) abrirModalMovimentacao('SANGRIA');
+}
+function atalhoF8() {
+    if (state.caixaAberto) abrirModalMovimentacao('SUPRIMENTO');
+}
+function atalhoF9() {
+    if (state.caixaAberto && typeof processarFechamentoCaixa === 'function') processarFechamentoCaixa();
+}
+
+// Esc fecha o modal de escolha de produto (os demais são fechados pelo pdv_base.js)
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('modalEscolhaProduto')?.style.display === 'flex') {
+        fecharModalEscolhaProduto();
+    }
+});
+
+window.ATALHOS_DESTA_TELA = [
+    { tecla: 'F4', acao: 'Focar código de barras (a qualquer momento)' },
+    { tecla: 'Enter', acao: 'Bipar → quantidade → volta pro código (bipe o próximo)' },
+    { tecla: 'Enter (campo vazio)', acao: 'Sinaliza fim dos itens → vai para forma de pagamento' },
+    { tecla: 'F6', acao: 'Finalizar venda' },
+    { tecla: 'Ctrl+Enter', acao: 'Finalizar venda (alternativa ao F6)' },
+    { tecla: 'F7', acao: 'Abrir Sangria' },
+    { tecla: 'F8', acao: 'Abrir Suprimento' },
+    { tecla: 'F9', acao: 'Fechar caixa' },
+    { tecla: '↑ ↓ ← →', acao: 'Navegar entre formas de pagamento' },
+];
+
+iniciarSistema();
+
+</script>
+
+<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; color:#fff; padding:12px; display:flex; justify-content:center; gap:25px; z-index:9999; font-weight:bold; border-top: 2px solid #059669;">
+    <span style="cursor:pointer;" onclick="window.location.href='/'">[F1] Vendas</span>
+    <span style="cursor:pointer;" onclick="window.location.href='/estoque'">[F2] Estoque</span>
+    <span style="cursor:pointer;" onclick="window.location.href='/relatorios'">[F3] Relatórios</span>
+    <span style="cursor:pointer;" onclick="abrirTelaDeAtalhos()">[?] Atalhos</span>
+    </div>
+
