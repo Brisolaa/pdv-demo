@@ -1,8 +1,4 @@
 """Seed de dados ficticios para o ambiente de demonstracao publica do PDV Emporio.
-
-IMPORTANTE: isso e SOMENTE para a demo publica. Nunca rode isso contra o banco
-de producao real da Distribuidora Emporio -- os produtos abaixo sao ficticios,
-nao tem nenhuma relacao com o catalogo real do cliente.
 """
 from database import inicializar_banco, db_conectar, db_produto_cadastrar
 
