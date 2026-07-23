@@ -33,9 +33,11 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: linear-gradient(135deg, #0f0f0fda 0%, #015747 100%);
-  min-height: 100vh;
+  height: 100vh;
   padding: 20px;
+  padding-bottom: 90px; /* espaço reservado pro footer-nav fixo não cobrir nada */
   font-size: 18px; /* base maior — acessibilidade */
+  overflow: hidden; /* a página inteira não rola mais — só o carrinho, por dentro */
 }
 
 /* Marca d'água no fundo da página (sobre o verde) — puramente decorativa */
@@ -68,13 +70,21 @@ input[type="number"] {
 .pdv {
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: 100%;
   background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   max-width: 1800px;
   margin: 0 auto;
+}
+
+#screen {
+  flex: 1;
+  min-height: 0; /* crucial: sem isso o filho não consegue encolher e rolar por dentro */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .topbar {
@@ -171,7 +181,8 @@ input[type="number"] {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 0;
-  min-height: 520px;
+  flex: 1;
+  min-height: 0; /* mesmo motivo: item de grid também precisa disso pra poder rolar por dentro */
 }
 
 .left {
@@ -182,6 +193,8 @@ input[type="number"] {
   border-right: 1px solid var(--border);
   background: #ffffff;
   color: var(--text-primary);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .right {
@@ -191,6 +204,7 @@ input[type="number"] {
   gap: 20px;
   background: #ffffff;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .section-label {
@@ -367,12 +381,13 @@ input[type="number"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 16px 12px;
   border-top: 2px solid var(--accent);
   border-bottom: 2px solid var(--border);
-  background: linear-gradient(90deg, rgba(5, 150, 105, 0.08) 0%, transparent 100%);
-  padding: 16px 12px;
+  background-color: #ffffff;
+  background-image: linear-gradient(90deg, rgba(5, 150, 105, 0.08) 0%, transparent 100%);
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .total-label {
@@ -554,7 +569,7 @@ input[type="number"] {
   gap: 24px;
   padding: 60px 40px;
   background: linear-gradient(135deg, #f3f4f6 0%, #eff2f5 100%);
-  min-height: 520px;
+  flex: 1;
 }
 
 .abertura-card {
@@ -736,6 +751,33 @@ input[type="number"] {
   letter-spacing: 0.5px;
 }
 
+.footer-nav-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 9px 18px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.footer-nav-btn:hover {
+  background: rgba(5, 150, 105, 0.28);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.footer-nav-btn:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
 .btn-footer-danger {
   padding: 10px 18px;
   border-radius: 6px;
@@ -825,25 +867,23 @@ input[type="number"] {
 <div id="ticket-impressao" style="display:none; width: 200px; font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #000;">
     <div style="text-align:center; margin-bottom: 10px;">
         <img src="/static/img/logo.png" alt="" style="width: 90px; height: auto; margin-bottom: 4px; filter: grayscale(100%) contrast(140%);"><br>
-        <strong>Empório Distribuidora</strong><br>
-        Rua nomerua, 100 - Centro, Curitiba - PR, 80000-000<br>
-        Tel: (41) 99999-9999<br>
-         ____________________________
+        <strong>Empório Distribuidora de bebidas</strong><br>
+        *** SISTEMA DEMONSTRATIVO — DADOS FICTÍCIOS ***<br>
+        --------------------------------
     </div>
     <div id="ticket-itens"></div>
     <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
         <strong id="ticket-total"></strong>
     </div>
     <div style="text-align:center; margin-top: 15px;">
-      seg a qui 10:00–22:00<br>
-      sexta e sábado 10:00–23:00<br>
-      domingo 10:00–18:00<br>
-      Obrigado pela preferência, volte sempre!<br>
+        Obrigado pela preferência, volte sempre!
     </div>
-    <div style="text-align:center; margin-top: 14px; border-top: 1px dashed #000; padding-top: 10px; font-size: 10px;">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=https://github.com/Brisolaa"
-         alt="QR code para o GitHub de Felipe Brisola" style="width:70px;height:70px;margin:0 auto;">
-    <div style="margin-top:4px;">Sistema desenvolvido por Felipe Brisola<br>github.com/Brisolaa</div>
+    <div style="text-align:center; margin-top: 14px; border-top: 1px dashed #000; padding-top: 10px;">
+        <div style="font-weight:bold; margin-bottom: 6px;">Sistema desenvolvido por</div>
+        <div style="font-weight:bold;">Felipe Brisola</div>
+        <div style="margin-top: 4px;">brisola.dev@gmail.com</div>
+        <div>github.com/Brisolaa</div>
+        <div>linkedin.com/in/SEU-USUARIO-AQUI</div>
     </div>
 </div>
 
@@ -1022,8 +1062,8 @@ function renderFechado(){
         <div class="section-label">Operador</div>
         <select id="inp-op" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('inp-fundo').focus();}" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:4px; font-size:14px; background:#fff; margin-bottom:10px;">
           <option value="">Selecione um operador...</option>
-          <option value="Felipe">Felipe</option>
-          <option value="Brisola">Brisola</option>
+          <option value="Junior">Junior</option>
+          <option value="Sergio">Sergio</option>
           <option value="Outro">Outro</option>
         </select>
       </div>
@@ -1083,7 +1123,7 @@ function renderMain(){
         ${alertHtml}
       </div>
 
-      <div class="cart-wrap" style="flex:1;overflow:auto">
+      <div class="cart-wrap" style="flex:1;overflow:auto;min-height:0">
         <table class="cart-table">
           <thead><tr>
             <th>Produto</th><th>Preço (R$)</th><th>Qtd</th><th>Subtotal</th><th></th>
@@ -1616,11 +1656,6 @@ function imprimirFechamento() {
   .assinatura { margin-top:50px; border-top:1px solid #333; width:280px; padding-top:5px; font-size:11px; }
   @media print { body { padding:0; } }
 </style></head><body>
-{% if demo_mode %}
-<div style="background:#7c3aed;color:#fff;text-align:center;padding:8px;font-size:14px;font-family:sans-serif;">
-  🔴 Ambiente de demonstração pública — dados fictícios, reiniciados a cada poucas horas.
-</div>
-{% endif %}
   <header>
     <img src="/static/img/logo.png" alt="">
     <div>
@@ -2040,10 +2075,10 @@ iniciarSistema();
 
 </script>
 
-<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; color:#fff; padding:12px; display:flex; justify-content:center; gap:25px; z-index:9999; font-weight:bold; border-top: 2px solid #059669;">
-    <span style="cursor:pointer;" onclick="window.location.href='/'">[F1] Vendas</span>
-    <span style="cursor:pointer;" onclick="window.location.href='/estoque'">[F2] Estoque</span>
-    <span style="cursor:pointer;" onclick="window.location.href='/relatorios'">[F3] Relatórios</span>
-    <span style="cursor:pointer;" onclick="abrirTelaDeAtalhos()">[?] Atalhos</span>
+<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; padding:10px 12px; display:flex; justify-content:center; gap:12px; z-index:9999; border-top: 2px solid #059669; flex-wrap:wrap;">
+    <button class="footer-nav-btn" onclick="window.location.href='/'"><span class="kbd-badge">F1</span> Vendas</button>
+    <button class="footer-nav-btn" onclick="window.location.href='/estoque'"><span class="kbd-badge">F2</span> Estoque</button>
+    <button class="footer-nav-btn" onclick="window.location.href='/relatorios'"><span class="kbd-badge">F3</span> Relatórios</button>
+    <button class="footer-nav-btn" onclick="abrirTelaDeAtalhos()"><span class="kbd-badge">?</span> Atalhos</button>
     </div>
 
