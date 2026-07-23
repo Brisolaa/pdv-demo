@@ -583,6 +583,7 @@ input[type="number"] {
   gap: 18px;
   border: none;
   box-shadow: var(--shadow-lg);
+  overflow-x: hidden;
 }
 
 .abertura-card input {
@@ -867,7 +868,7 @@ input[type="number"] {
 <div id="ticket-impressao" style="display:none; width: 200px; font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #000;">
     <div style="text-align:center; margin-bottom: 10px;">
         <img src="/static/img/logo.png" alt="" style="width: 90px; height: auto; margin-bottom: 4px; filter: grayscale(100%) contrast(140%);"><br>
-        <strong>Empório Distribuidora</strong><br>
+        <strong>Empório Distribuidora de bebidas</strong><br>
         *** SISTEMA DEMONSTRATIVO — DADOS FICTÍCIOS ***<br>
         --------------------------------
     </div>
@@ -883,7 +884,7 @@ input[type="number"] {
         <div style="font-weight:bold;">Felipe Brisola</div>
         <div style="margin-top: 4px;">brisola.dev@gmail.com</div>
         <div>github.com/Brisolaa</div>
-        <div>linkedin.com/in/felipebrisola/</div>
+        <div>linkedin.com/in/SEU-USUARIO-AQUI</div>
     </div>
 </div>
 
@@ -1062,8 +1063,8 @@ function renderFechado(){
         <div class="section-label">Operador</div>
         <select id="inp-op" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('inp-fundo').focus();}" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:4px; font-size:14px; background:#fff; margin-bottom:10px;">
           <option value="">Selecione um operador...</option>
-          <option value="Felipe">Felipe</option>
-          <option value="Brisola">Brisola</option>
+          <option value="Junior">Junior</option>
+          <option value="Sergio">Sergio</option>
           <option value="Outro">Outro</option>
         </select>
       </div>
@@ -1233,7 +1234,7 @@ function renderMain(){
       </div>
       <div style="display:flex; gap:8px; margin-top:6px;">
         <button onclick="fecharModalFechamento()" class="btn" style="flex:1; justify-content:center;">Cancelar</button>
-        <button id="btnConfirmarFechamento" onclick="confirmarFechamentoCaixa()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar Fechamento</button>
+        <button id="btnConfirmarFechamento" onclick="confirmarFechamentoCaixa()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar</button>
       </div>
     </div>
   </div>
