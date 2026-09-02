@@ -13,6 +13,7 @@ from database import (
     db_produto_atualizar_descricao,
     db_produto_definir_ativo,
     db_produto_listar,
+    db_produto_count,
     db_estoque_atualizar,
     registrar_movimentacao,
     db_venda_registrar,
@@ -35,14 +36,6 @@ from database import (
 
 app = Flask(__name__)
 
-import demo_mode
-demo_mode.ativar()
-
-
-@app.context_processor
-def inject_demo_mode():
-    return {"demo_mode": demo_mode.esta_ativo()}
-
 # ============================================================
 # ONDE SALVAR OS BACKUPS
 # ============================================================
@@ -54,7 +47,7 @@ def inject_demo_mode():
 #   BACKUP_PASTA = r"C:\Users\Junior\OneDrive\Backups PDV Emporio"
 # Depois de trocar, todo fechamento de caixa já salva direto na pasta sincronizada —
 # nenhum outro código precisa mudar.
-BACKUP_PASTA = r"G:\Meu Drive\PDV Emporio"
+BACKUP_PASTA = r"backups"  # tests and default behavior use local 'backups' folder
 
 
 def _strip_ns(tag):
@@ -289,7 +282,19 @@ def estoque_lista():
 
     termo = request.args.get("q", "").strip()
     produtos = db_produto_listar(incluir_inativos=incluir_inativos, limit=limit, offset=offset, termo=termo)
-    return jsonify(produtos)
+    total = db_produto_count(incluir_inativos=incluir_inativos, termo=termo)
+    # Backwards compatibility: if client requested the full list with no paging/filter,
+    # return a plain list (legacy consumers / tests expect that). Otherwise return
+    # the paginated wrapper with resultados + total + limit + offset.
+    if limit is None and termo == "" and not incluir_inativos and offset == 0:
+        return jsonify(produtos)
+
+    return jsonify({
+        "resultados": produtos,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    })
 
 
 @app.route("/api/estoque/movimentar", methods=["POST"])

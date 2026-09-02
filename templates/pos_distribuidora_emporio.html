@@ -583,7 +583,6 @@ input[type="number"] {
   gap: 18px;
   border: none;
   box-shadow: var(--shadow-lg);
-  overflow-x: hidden;
 }
 
 .abertura-card input {
@@ -869,22 +868,25 @@ input[type="number"] {
     <div style="text-align:center; margin-bottom: 10px;">
         <img src="/static/img/logo.png" alt="" style="width: 90px; height: auto; margin-bottom: 4px; filter: grayscale(100%) contrast(140%);"><br>
         <strong>Empório Distribuidora</strong><br>
-        *** SISTEMA DEMONSTRATIVO — DADOS FICTÍCIOS ***<br>
-        --------------------------------
+        R. da Pedreira, 154 - Campo Pequeno, Colombo - PR, 83404-010<br>
+        Tel: (41) 99680-1240<br>
+        ___________________________
     </div>
     <div id="ticket-itens"></div>
     <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px;">
         <strong id="ticket-total"></strong>
     </div>
     <div style="text-align:center; margin-top: 15px;">
+      segunda a quinta 10h - 22h<br>
+      sexta e sabado 10h - 23h<br>
+      domingo 10h - 18h<br>
+     
         Obrigado pela preferência, volte sempre!
     </div>
     <div style="text-align:center; margin-top: 14px; border-top: 1px dashed #000; padding-top: 10px;">
-        <div style="font-weight:bold; margin-bottom: 6px;">Sistema desenvolvido por</div>
-        <div style="font-weight:bold;">Felipe Brisola</div>
-        <div style="margin-top: 4px;">brisola.dev@gmail.com</div>
-        <div>github.com/Brisolaa</div>
-        <div>inkedin.com/in/felipebrisola/</div>
+        <div style="font-weight:bold; margin-bottom: 6px;">Deixe sua avaliação!</div>
+        <img src="/static/img/qrcode-avaliacao.png" alt="QR Code para avaliar no Google" style="width: 110px; height: 110px; margin: 0 auto;">
+        <div style="font-size: 10px; margin-top: 6px;">Aponte a câmera do celular</div>
     </div>
 </div>
 
@@ -909,25 +911,53 @@ let state = {
   modoContingencia: false
 };
 
+// Anti-duplication for fast scanner input: many barcode readers send the digits
+// as a stream followed by an Enter key. That sequence can trigger both 'change'
+// and 'keydown' handlers and add the same product twice. The small dedupe
+// guard below ignores repeated identical scans within a short window.
+let _lastScan = { code: null, time: 0 };
+const SCAN_DEDUP_MS = 800;
+function isDuplicateScan(code) {
+    if (!code) return false;
+    const now = Date.now();
+    if (_lastScan.code === code && (now - _lastScan.time) < SCAN_DEDUP_MS) return true;
+    _lastScan.code = code;
+    _lastScan.time = now;
+    return false;
+}
+
 let tipoMovimentacaoAtual = '';
 
 // Função necessária para o carrinho funcionar
-function adicionarAoCarrinho(produto) {
-    // 1. Verifica se o item já existe no carrinho (pelo código)
-    const itemExistente = state.cart.find(item => item.codigo_barras === produto.codigo_barras);
-    
-    if (itemExistente) {
-        // Apenas soma a quantidade, sem travar por estoque
-        itemExistente.qty += 1;
-    } else {
-        // Adiciona novo item ao carrinho
-        state.cart.push({
-            codigo_barras: produto.codigo_barras,
-            descricao: produto.descricao,
-            preco_venda: produto.preco_venda,
-            qty: 1
-        });
+function adicionarAoCarrinho(produto, opts = {}) {
+    // opts.forceSeparate: quando true, força uma nova linha mesmo se o produto já estiver no carrinho
+    const forceSeparate = !!opts.forceSeparate;
+
+    if (!forceSeparate) {
+        // 1. Verifica se o item já existe no carrinho (pelo código)
+        const itemExistente = state.cart.find(item => item.codigo_barras === produto.codigo_barras);
+        
+        if (itemExistente) {
+            // Apenas soma a quantidade, sem travar por estoque
+            itemExistente.qty += 1;
+
+            // Marca o item pra piscar na tabela (confirmação visual de que entrou)
+            state.ultimoAdicionado = produto.codigo_barras;
+            setTimeout(() => { state.ultimoAdicionado = null; }, 1200);
+
+            // Atualiza a tela
+            render(); 
+            return;
+        }
     }
+
+    // Adiciona novo item ao carrinho (linha separada) com qty = 1
+    state.cart.push({
+        codigo_barras: produto.codigo_barras,
+        descricao: produto.descricao,
+        preco_venda: produto.preco_venda,
+        qty: 1
+    });
 
     // Marca o item pra piscar na tabela (confirmação visual de que entrou)
     state.ultimoAdicionado = produto.codigo_barras;
@@ -1063,9 +1093,9 @@ function renderFechado(){
         <div class="section-label">Operador</div>
         <select id="inp-op" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('inp-fundo').focus();}" style="width:100%; padding:12px; border:2px solid var(--border); border-radius:4px; font-size:14px; background:#fff; margin-bottom:10px;">
           <option value="">Selecione um operador...</option>
-          <option value="Felipe">Felipe</option>
-          <option value="Brisola">Brisola</option>
-          <option value="Desenvolvedor">Desenvolvedor</option>
+          <option value="Junior">Junior</option>
+          <option value="Sergio">Sergio</option>
+          <option value="Outro">Outro</option>
         </select>
       </div>
       <div>
@@ -1234,7 +1264,7 @@ function renderMain(){
       </div>
       <div style="display:flex; gap:8px; margin-top:6px;">
         <button onclick="fecharModalFechamento()" class="btn" style="flex:1; justify-content:center;">Cancelar</button>
-        <button id="btnConfirmarFechamento" onclick="confirmarFechamentoCaixa()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar</button>
+        <button id="btnConfirmarFechamento" onclick="confirmarFechamentoCaixa()" class="btn btn-success" style="flex:1; justify-content:center;">Confirmar Fechamento</button>
       </div>
     </div>
   </div>
@@ -1260,7 +1290,7 @@ function renderMain(){
   </div>`;
 }
 
-async function searchProduct(codigo) {
+async function searchProduct(codigo, opts = {}) {
     const termo = String(codigo).trim();
     if (!termo) return;
 
@@ -1274,7 +1304,7 @@ async function searchProduct(codigo) {
 
         if (resposta.total === 1) {
             // Achou exatamente um: adiciona direto (comportamento de leitor de código)
-            adicionarProdutoEFocaQtd(resposta.resultados[0]);
+            adicionarProdutoEFocaQtd(resposta.resultados[0], opts);
             return;
         }
 
@@ -1300,18 +1330,20 @@ async function searchProduct(codigo) {
     }
 }
 
-function adicionarProdutoEFocaQtd(produto) {
+function adicionarProdutoEFocaQtd(produto, opts = {}) {
     adicionarAoCarrinho({
         codigo_barras: produto.codigo_barras,
         descricao: produto.descricao,
         preco_venda: produto.preco_venda
-    });
+    }, opts);
     state.barcodeInput = '';
     const inpBc = document.getElementById('inp-bc');
     if (inpBc) inpBc.value = '';
 
     // Navegação por teclado: já encontrou o produto, pula direto pro campo de quantidade
-    const idx = state.cart.findIndex(item => item.codigo_barras === produto.codigo_barras);
+    // Se adicionamos forçando linha separada, o último índice corresponde ao novo item —
+    // caso contrário, pode ter incrementado um item existente; buscamos o último adicionado
+    const idx = state.cart.map(i => i.codigo_barras).lastIndexOf(produto.codigo_barras);
     if (idx > -1) {
         const inputQtd = document.querySelector(`[data-qty-idx="${idx}"]`);
         if (inputQtd) { inputQtd.focus(); inputQtd.select(); }
@@ -1739,22 +1771,40 @@ function bindMain(){
         return;
       }
 
-      searchProduct(termo);
+      {
+            const code = String(termo).trim();
+            if (!isDuplicateScan(code)) searchProduct(code);
+        }
     });
     inp.addEventListener("input",e=>{state.barcodeInput=e.target.value;});
   }
   const btnAdd=document.getElementById("btn-add");
-  if(btnAdd)btnAdd.addEventListener("click",()=>searchProduct(state.barcodeInput));
+  if(btnAdd)btnAdd.addEventListener("click",()=>{
+      const code = String(state.barcodeInput).trim();
+      if (!isDuplicateScan(code)) searchProduct(code);
+    });
 
   document.querySelectorAll("[data-price-idx], [data-qty-idx]").forEach(input => {
     input.addEventListener("change", e => {
       const idx = parseInt(e.target.dataset.priceIdx !== undefined ? e.target.dataset.priceIdx : e.target.dataset.qtyIdx);
       const val = parseFloat(e.target.value);
+      const isPrice = e.target.dataset.priceIdx !== undefined;
+      const isQty = e.target.dataset.qtyIdx !== undefined;
       
       if (!isNaN(val) && val >= 0) {
-        if(e.target.dataset.priceIdx !== undefined) {
+        if (isPrice) {
           state.cart[idx].preco_venda = val;
-        } else {
+        } else if (isQty) {
+          // Regra operacional: valores muito grandes (ex: >1000) vindos do leitor devem
+          // ser interpretados como um novo código de barras lido — não como quantidade.
+          if (val > 1000) {
+            // Tratar como leitura de novo item (preserva zeros à esquerda se houver)
+            const codeChange = String(e.target.value).trim();
+            if (!isDuplicateScan(codeChange)) searchProduct(codeChange);
+            // Não alterar a quantidade atual do item existente
+            // Renderização será chamada pela searchProduct/adicionarProdutoEFocaQtd
+            return;
+          }
           state.cart[idx].qty = val;
         }
       }
@@ -1768,12 +1818,27 @@ function bindMain(){
 
       const idx = parseInt(e.target.dataset.priceIdx !== undefined ? e.target.dataset.priceIdx : e.target.dataset.qtyIdx);
       const val = parseFloat(e.target.value);
+      const isPrice = e.target.dataset.priceIdx !== undefined;
+      const isQty = e.target.dataset.qtyIdx !== undefined;
+
       if (!isNaN(val) && val >= 0) {
-        if (e.target.dataset.priceIdx !== undefined) state.cart[idx].preco_venda = val;
-        else state.cart[idx].qty = val;
+        if (isPrice) {
+          state.cart[idx].preco_venda = val;
+        } else if (isQty) {
+          // Se o operador digitou um número grande (>1000) no campo de quantidade,
+          // interpretá-lo como leitura de código de barras (novo item) em vez de
+          // atualizar a quantidade do item atual.
+          if (val > 1000) {
+            const codeEnter = String(e.target.value).trim();
+            if (!isDuplicateScan(codeEnter)) searchProduct(codeEnter);
+            // Re-render estará sendo chamado pela searchProduct/adicionarProdutoEFocaQtd
+            return;
+          }
+          state.cart[idx].qty = val;
+        }
       }
 
-      const eraQtd = e.target.dataset.qtyIdx !== undefined;
+      const eraQtd = isQty;
       render();
 
       if (eraQtd) {

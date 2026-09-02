@@ -229,6 +229,33 @@ input.field, .controls input, #search {
   letter-spacing: 0.5px;
 }
 
+.footer-nav-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 9px 18px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.footer-nav-btn:hover {
+  background: rgba(5, 150, 105, 0.28);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.footer-nav-btn:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
 .btn-cancel {
   background: var(--light);
   color: var(--text-primary);
@@ -356,15 +383,9 @@ input.field, .controls input, #search {
   opacity: 0;
 }
 
-#footer-nav span:hover { color: var(--accent-light); }
 </style>
 </head>
 <body>
-{% if demo_mode %}
-<div style="background:#7c3aed;color:#fff;text-align:center;padding:8px;font-size:14px;font-family:sans-serif;">
-  🔴 Ambiente de demonstração pública — dados fictícios, reiniciados a cada poucas horas.
-</div>
-{% endif %}
 
 <h2 class="sr-only">Controle de Estoque — Distribuidora Empório</h2>
 
@@ -398,8 +419,11 @@ input.field, .controls input, #search {
     <div>
       <div class="section-label" style="margin-bottom:10px;">Produtos cadastrados</div>
       <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-        <input type="text" id="search" placeholder="🔍 Buscar produto..." onkeyup="filtrar()">
-        <select id="ordenacao" onchange="carregar()" style="padding:12px 14px; border:2px solid var(--border); border-radius:4px; font-size:15px; font-family:inherit; background:#fff; color:var(--text-primary); cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="text" id="search" placeholder="🔍 Buscar produto..." onkeydown="if(event.key==='Enter'){event.preventDefault(); carregar(document.getElementById('search').value.trim()); }" onkeyup="filtrar()" style="min-width:240px;">
+          <button class="btn btn-primary" style="padding:10px 12px; font-size:14px;" onclick="carregar(document.getElementById('search').value.trim())">Buscar</button>
+        </div>
+        <select id="ordenacao" onchange="carregar(document.getElementById('search').value.trim())" style="padding:12px 14px; border:2px solid var(--border); border-radius:4px; font-size:15px; font-family:inherit; background:#fff; color:var(--text-primary); cursor:pointer;">
           <option value="critico">⚠️ Estoque crítico primeiro</option>
           <option value="qtd_asc">Menor estoque</option>
           <option value="qtd_desc">Maior estoque</option>
@@ -410,7 +434,7 @@ input.field, .controls input, #search {
           <option value="sem_preco">Sem preço definido</option>
         </select>
         <label style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text-secondary); cursor:pointer;">
-          <input type="checkbox" id="chkInativos" onchange="carregar()" style="width:16px; height:16px;">
+          <input type="checkbox" id="chkInativos" onchange="carregar(document.getElementById('search').value.trim())" style="width:16px; height:16px;">
           Mostrar inativados
         </label>
       </div>
@@ -420,7 +444,10 @@ input.field, .controls input, #search {
       <thead><tr><th>Código</th><th>Produto</th><th>Preço (R$)</th><th>Estoque</th><th>Mínimo</th><th></th></tr></thead>
       <tbody id="lista"></tbody>
     </table>
-    <div id="btnCarregarMaisContainer"></div>
+    <div id="loadMoreContainer" style="text-align:center; margin-top:12px;">
+      <div id="resultsInfo" style="color:var(--text-secondary); margin-bottom:8px;"></div>
+      <button id="btnLoadMore" class="btn btn-primary" style="display:none;" onclick="loadMore()">Mostrar mais</button>
+    </div>
   </div>
 </div>
 
@@ -470,20 +497,22 @@ input.field, .controls input, #search {
 
 <div id="toast">Mensagem aqui</div>
 
-<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; color:#fff; padding:12px; display:flex; justify-content:center; gap:25px; z-index:9999; font-weight:bold; border-top: 2px solid #059669;">
-    <span style="cursor:pointer;" onclick="window.location.href='/'">[F1] Vendas</span>
-    <span style="cursor:pointer;" onclick="window.location.href='/estoque'">[F2] Estoque</span>
-    <span style="cursor:pointer;" onclick="window.location.href='/relatorios'">[F3] Relatórios</span>
-    <span style="cursor:pointer;" onclick="abrirTelaDeAtalhos()">[?] Atalhos</span>
+<div id="footer-nav" style="position:fixed; bottom:0; left:0; width:100%; background:#1a1a1a; padding:10px 12px; display:flex; justify-content:center; gap:12px; z-index:9999; border-top: 2px solid #059669; flex-wrap:wrap;">
+    <button class="footer-nav-btn" onclick="window.location.href='/'"><span class="kbd-badge">F1</span> Vendas</button>
+    <button class="footer-nav-btn" onclick="window.location.href='/estoque'"><span class="kbd-badge">F2</span> Estoque</button>
+    <button class="footer-nav-btn" onclick="window.location.href='/relatorios'"><span class="kbd-badge">F3</span> Relatórios</button>
+    <button class="footer-nav-btn" onclick="abrirTelaDeAtalhos()"><span class="kbd-badge">?</span> Atalhos</button>
 </div>
 
 <!-- pdv_base.js precisa carregar ANTES do script abaixo, pois carregar() já usa API na primeira execução -->
 <script src="/static/js/pdv_base.js"></script>
 <script>
     let prodAtual = null;
-    // Paginação local para evitar carregar todo o catálogo de uma vez
-    let estoque_offset = 0;
-    const estoque_limit = 200;
+    const PAGE_SIZE = 50; // número de itens por página carregada
+    let currentOffset = 0;
+    let currentQuery = '';
+    let totalMatches = 0;
+    let isLoading = false;
 
     function showToast(msg, tipo = 'sucesso') {
         const toast = document.getElementById("toast");
@@ -505,87 +534,103 @@ input.field, .controls input, #search {
         }, 3000);
     }
 
-    function carregarMais() {
-      estoque_offset += estoque_limit;
-      carregar(true);
-    }
+    // Carrega primeiros resultados (ou próximos) do servidor com paginação
+    async function carregar(q = '', append = false) {
+        const incluirInativos = document.getElementById('chkInativos').checked;
+        const lista = document.getElementById('lista');
+        const btn = document.getElementById('btnLoadMore');
 
-    async function carregar(append = false) {
-      if (!append) estoque_offset = 0;
-      const incluirInativos = document.getElementById('chkInativos').checked;
-      const q = document.getElementById('search').value.trim();
-      const data = await API.estoque.listar(incluirInativos, estoque_limit, estoque_offset, q);
-      const lista = document.getElementById('lista');
-      const moreContainer = document.getElementById('btnCarregarMaisContainer');
-
-      if (!data.length) {
-            const filtrando = document.getElementById('chkInativos').checked;
-        lista.innerHTML = `<tr><td colspan="6" class="stock-empty">
-                <i class="ti ti-package-off" style="font-size:34px;display:block;margin:0 auto 10px;opacity:0.5" aria-hidden="true"></i>
-                <div style="font-weight:700;font-size:17px;color:var(--text-primary);margin-bottom:4px">Nenhum produto cadastrado</div>
-                <div style="font-size:14px">${filtrando ? 'Nem ativos, nem inativados.' : 'Cadastre acima ou importe um XML de nota fiscal'} <span class="kbd-badge" style="color:var(--text-secondary);border-color:var(--border);background:var(--light)">F9</span></div>
-            </td></tr>`;
-        if (moreContainer) moreContainer.innerHTML = '';
-            return;
+        if (!append) {
+            currentOffset = 0;
+            currentQuery = (q || '').trim();
+            lista.innerHTML = '';
+            if (btn) btn.style.display = 'none';
         }
 
-      ordenarProdutos(data);
+        if (isLoading) return;
+        isLoading = true;
 
-      const produtoHtml = data.map(p => {
-            let valorPreco = parseFloat(p.preco_venda || 0);
-            const critico = p.estoque_atual <= p.estoque_minimo;
-            const semPreco = valorPreco <= 0;
-            const inativo = p.ativo === false;
+        try {
+            const resp = await API.estoque.listar(incluirInativos, PAGE_SIZE, currentOffset, currentQuery);
+            const data = (resp && resp.resultados) ? resp.resultados : (Array.isArray(resp) ? resp : []);
+            totalMatches = (resp && typeof resp.total === 'number') ? resp.total : 0;
 
-            const celulaPreco = semPreco
-                ? `<button class="btn" style="padding:7px 12px;font-size:12px;background:var(--warning);color:#fff;" onclick="abrirEditarProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}',${valorPreco})">
-                       <i class="ti ti-alert-triangle" aria-hidden="true"></i> Definir preço
-                   </button>`
-                : `<span style="display:flex; align-items:center; gap:8px;">
-                       <strong>R$ ${valorPreco.toFixed(2).replace('.', ',')}</strong>
-                   </span>`;
+            if (!append && totalMatches === 0) {
+                const filtrando = incluirInativos;
+                lista.innerHTML = `<tr><td colspan="6" class="stock-empty">
+                    <i class="ti ti-package-off" style="font-size:34px;display:block;margin:0 auto 10px;opacity:0.5" aria-hidden="true"></i>
+                    <div style="font-weight:700;font-size:17px;color:var(--text-primary);margin-bottom:4px">Nenhum produto encontrado</div>
+                    <div style="font-size:14px">${filtrando ? 'Nenhum produto (incluindo inativos) encontrado.' : 'Nenhum produto encontrado com esse termo.'} <span class="kbd-badge" style="color:var(--text-secondary);border-color:var(--border);background:var(--light)">F9</span></div>
+                </td></tr>`;
+                currentOffset = 0;
+                if (btn) btn.style.display = 'none';
+                const info = document.getElementById('resultsInfo'); if (info) info.textContent = '';
+                return;
+            }
 
-            const acaoExcluirReativar = inativo
-                ? `<button class="btn btn-success" style="padding:8px 12px;font-size:13px;" onclick="reativarProduto('${p.codigo_barras}')" title="Reativar produto">
-                       <i class="ti ti-rotate-clockwise" aria-hidden="true"></i>
-                   </button>`
-                : `<button class="btn" style="padding:8px 12px;font-size:13px;background:var(--danger);color:#fff;" onclick="excluirProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}')" title="Inativar produto">
-                       <i class="ti ti-trash" aria-hidden="true"></i>
-                   </button>`;
+            ordenarProdutos(data);
 
-            return `
-                <tr${inativo ? ' class="inativo"' : (semPreco ? ' style="background: rgba(217,119,6,0.08);"' : '')}>
-                    <td>${p.codigo_barras}</td>
-                    <td>
-                        <span style="display:flex; align-items:center; gap:8px;">
-                            ${p.descricao}${inativo ? ' <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--danger);">(inativo)</span>' : ''}
-                            ${!inativo ? `<button title="Editar produto" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:2px;" onclick="abrirEditarProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}',${valorPreco})"><i class="ti ti-pencil" aria-hidden="true"></i></button>` : ''}
-                        </span>
-                    </td>
-                    <td>${celulaPreco}</td>
-                    <td><strong style="color: ${critico ? 'var(--danger)' : 'var(--success)'};">${p.estoque_atual}</strong></td>
-                    <td>${p.estoque_minimo}</td>
-                    <td style="display:flex; gap:6px;">
-                        ${!inativo ? `<button class="btn btn-success" style="padding:8px 12px;font-size:13px;" onclick="promptMov('${p.codigo_barras}')" title="Movimentar"><i class="ti ti-arrows-exchange" aria-hidden="true"></i></button>` : ''}
-                        ${acaoExcluirReativar}
-                    </td>
-                </tr>
-            `;
-        }).join('');
+            const rowsHtml = data.map(p => {
+                let valorPreco = parseFloat(p.preco_venda || 0);
+                const critico = p.estoque_atual <= p.estoque_minimo;
+                const semPreco = valorPreco <= 0;
+                const inativo = p.ativo === false;
 
-        if (append) {
-          lista.insertAdjacentHTML('beforeend', produtoHtml);
-        } else {
-          lista.innerHTML = produtoHtml;
-        }
+                const celulaPreco = semPreco
+                    ? `<button class="btn" style="padding:7px 12px;font-size:12px;background:var(--warning);color:#fff;" onclick="abrirEditarProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}',${valorPreco})">
+                           <i class="ti ti-alert-triangle" aria-hidden="true"></i> Definir preço
+                       </button>`
+                    : `<span style="display:flex; align-items:center; gap:8px;">
+                           <strong>R$ ${valorPreco.toFixed(2).replace('.', ',')}</strong>
+                       </span>`;
 
-        // Se recebeu exatamente o limite, pode haver mais registros: mostra botão "Carregar mais"
-        if (moreContainer) {
-          if (data.length === estoque_limit) {
-            moreContainer.innerHTML = `<div style="text-align:center;margin-top:12px;"><button class="btn btn-primary" id="btn-carregar-mais" onclick="carregarMais()" style="padding:10px 18px">Carregar mais</button></div>`;
-          } else {
-            moreContainer.innerHTML = '';
-          }
+                const acaoExcluirReativar = inativo
+                    ? `<button class="btn btn-success" style="padding:8px 12px;font-size:13px;" onclick="reativarProduto('${p.codigo_barras}')" title="Reativar produto">
+                           <i class="ti ti-rotate-clockwise" aria-hidden="true"></i>
+                       </button>`
+                    : `<button class="btn" style="padding:8px 12px;font-size:13px;background:var(--danger);color:#fff;" onclick="excluirProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}')" title="Inativar produto">
+                           <i class="ti ti-trash" aria-hidden="true"></i>
+                       </button>`;
+
+                return `
+                    <tr${inativo ? ' class="inativo"' : (semPreco ? ' style="background: rgba(217,119,6,0.08);"' : '')}>
+                        <td>${p.codigo_barras}</td>
+                        <td>
+                            <span style="display:flex; align-items:center; gap:8px;">
+                                ${p.descricao}${inativo ? ' <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--danger);">(inativo)</span>' : ''}
+                                ${!inativo ? `<button title="Editar produto" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); padding:2px;" onclick="abrirEditarProduto('${p.codigo_barras}','${escapeAttr(p.descricao)}',${valorPreco})"><i class="ti ti-pencil" aria-hidden="true"></i></button>` : ''}
+                            </span>
+                        </td>
+                        <td>${celulaPreco}</td>
+                        <td><strong style="color: ${critico ? 'var(--danger)' : 'var(--success)'};">${p.estoque_atual}</strong></td>
+                        <td>${p.estoque_minimo}</td>
+                        <td style="display:flex; gap:6px;">
+                            ${!inativo ? `<button class="btn btn-success" style="padding:8px 12px;font-size:13px;" onclick="promptMov('${p.codigo_barras}')" title="Movimentar"><i class="ti ti-arrows-exchange" aria-hidden="true"></i></button>` : ''}
+                            ${acaoExcluirReativar}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (append) {
+                lista.insertAdjacentHTML('beforeend', rowsHtml);
+            } else {
+                lista.innerHTML = rowsHtml;
+            }
+
+            currentOffset += data.length;
+
+            // atualizar informação de resultados
+            const info = document.getElementById('resultsInfo');
+            if (info) info.textContent = `Mostrando ${Math.min(currentOffset, totalMatches)} de ${totalMatches}`;
+
+            // mostrar ou esconder botão "Mostrar mais"
+            if (btn) {
+                if (currentOffset < totalMatches) btn.style.display = '';
+                else btn.style.display = 'none';
+            }
+        } finally {
+            isLoading = false;
         }
     }
 
@@ -650,7 +695,7 @@ input.field, .controls input, #search {
         if (data.sucesso) {
             showToast("Produto cadastrado com sucesso!", 'sucesso');
             document.querySelectorAll('.controls input').forEach(inp => inp.value = '');
-            carregar();
+            carregar(document.getElementById('search').value.trim());
         } else {
             showToast(data.mensagem, 'erro');
         }
@@ -690,7 +735,7 @@ input.field, .controls input, #search {
         if (respDesc.sucesso && respPreco.sucesso) {
             showToast("Produto atualizado com sucesso!", 'sucesso');
             fecharEditarProduto();
-            carregar();
+            carregar(document.getElementById('search').value.trim());
         } else {
             showToast((respDesc.mensagem || respPreco.mensagem) || "Erro ao atualizar produto.", 'erro');
         }
@@ -705,7 +750,7 @@ input.field, .controls input, #search {
 
         if (data.sucesso) {
             showToast("Produto inativado.", 'alerta');
-            carregar();
+            carregar(document.getElementById('search').value.trim());
         } else {
             showToast(data.mensagem || "Erro ao inativar produto.", 'erro');
         }
@@ -716,7 +761,7 @@ input.field, .controls input, #search {
 
         if (data.sucesso) {
             showToast("Produto reativado!", 'sucesso');
-            carregar();
+            carregar(document.getElementById('search').value.trim());
         } else {
             showToast(data.mensagem || "Erro ao reativar produto.", 'erro');
         }
@@ -743,7 +788,7 @@ input.field, .controls input, #search {
                         `Defina o preço de cada um antes de vender (linhas destacadas em amarelo na lista).`
                     );
                 }
-                carregar();
+                carregar(document.getElementById('search').value.trim());
             } else {
                 showToast(data.mensagem || "Erro ao importar XML.", 'erro');
             }
@@ -782,7 +827,7 @@ input.field, .controls input, #search {
             let tipoToast = (tipo === 'AVARIA' || tipo === 'DEVOLUCAO') ? 'alerta' : 'sucesso';
             showToast(`Movimentação (${tipo}) registrada!`, tipoToast);
             fecharModal();
-            carregar();
+            carregar(document.getElementById('search').value.trim());
         } else {
             showToast("Erro ao movimentar!", 'erro');
         }
@@ -792,10 +837,31 @@ input.field, .controls input, #search {
         return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    let filtroTimeout = null;
+    // Debounce helper para evitar muitas requisições enquanto o usuário digita
+    function debounce(fn, wait) {
+        let t = null;
+        return function(...args) {
+            if (t) clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), wait);
+        };
+    }
+
+    // Carrega de forma debounced — chama o endpoint com o termo de busca (código ou descrição)
+    const debouncedCarregar = debounce(function(q) {
+        carregar(q || '');
+    }, 250);
+
+    // Chamado pelo onkeyup do campo de busca. Apenas dispara a busca debounced para o servidor.
     function filtrar() {
-        clearTimeout(filtroTimeout);
-        filtroTimeout = setTimeout(() => carregar(false), 180);
+        const q = document.getElementById('search').value.trim();
+        debouncedCarregar(q);
+    }
+
+    // Botão "Mostrar mais" carrega a próxima página com o termo atual
+    function loadMore() {
+        // currentQuery já é mantido por carregar(); se vazio, captura do campo
+        if (!currentQuery) currentQuery = document.getElementById('search').value.trim();
+        carregar(currentQuery, true);
     }
 
     window.addEventListener('keydown', e => {

@@ -462,13 +462,18 @@ def db_produto_listar(incluir_inativos=False, limit=None, offset=0, termo=""):
         termino_exato = termo
         termino_prefixo = termo.lower() + '%'
         termino_contem = '%' + termo.lower() + '%'
+        termino_codigo_prefixo = termo + '%'
 
+        # Tenta priorizar correspondência por código (prefixo/exato) e, em seguida,
+        # usar FTS na descrição quando disponível. Inclui também fallback para LIKE
+        # caso o FTS5 não esteja disponível no SQLite da plataforma.
         sql = """
             SELECT p.codigo_barras, p.descricao, p.preco_venda, p.estoque_atual, p.estoque_minimo, p.ativo
-            FROM produtos p JOIN produtos_fts ON p.codigo_barras = produtos_fts.codigo_barras
-            WHERE produtos_fts MATCH ?
+            FROM produtos p LEFT JOIN produtos_fts ON p.codigo_barras = produtos_fts.codigo_barras
+            WHERE (produtos_fts MATCH ? OR p.codigo_barras LIKE ?)
         """
         params.append(fts_query)
+        params.append(termino_codigo_prefixo)
 
         if not incluir_inativos:
             sql += " AND p.ativo = 1"
@@ -476,15 +481,17 @@ def db_produto_listar(incluir_inativos=False, limit=None, offset=0, termo=""):
         sql += """
             ORDER BY
                 CASE
-                    WHEN lower(p.descricao) = lower(?) THEN 0
-                    WHEN lower(p.descricao) LIKE ? THEN 1
+                    WHEN p.codigo_barras = ? THEN 0
+                    WHEN lower(p.descricao) = lower(?) THEN 1
                     WHEN lower(p.descricao) LIKE ? THEN 2
-                    ELSE 3
+                    WHEN lower(p.descricao) LIKE ? THEN 3
+                    ELSE 4
                 END,
-                bm25(f),
+                bm25(produtos_fts),
                 lower(p.descricao)
         """
-        params.extend([termino_exato, termino_prefixo, termino_contem])
+        # Precisamos passar os parâmetros na ordem: codigo_exato, descricao_exato, descricao_prefixo, descricao_contem
+        params.extend([termino_exato, termino_exato, termino_prefixo, termino_contem])
 
         if limit is not None:
             sql += " LIMIT ?"
@@ -496,13 +503,13 @@ def db_produto_listar(incluir_inativos=False, limit=None, offset=0, termo=""):
         try:
             linhas = db_buscar_todos(sql, tuple(params))
         except sqlite3.OperationalError:
-            # FTS não disponível; fallback para LIKE simples
+            # FTS não disponível; fallback para LIKE (inclui busca por código)
             sql = """
                 SELECT codigo_barras, descricao, preco_venda, estoque_atual, estoque_minimo, ativo
                 FROM produtos
-                WHERE lower(descricao) LIKE ?
+                WHERE (lower(descricao) LIKE ? OR codigo_barras LIKE ?)
             """
-            params = [termino_contem]
+            params = [termino_contem, termino_codigo_prefixo]
             if not incluir_inativos:
                 sql += " AND ativo = 1"
             sql += " ORDER BY descricao"
@@ -555,6 +562,54 @@ def db_estoque_atualizar(codigo, quantidade, operacao):
         UPDATE produtos SET estoque_atual = estoque_atual {sinal} ?
         WHERE codigo_barras = ?
     """, (quantidade, codigo))
+
+
+def db_produto_count(incluir_inativos=False, termo=""):
+    """Retorna o total de produtos que corresponderiam a uma busca (útil para paginação no front-end).
+    Segue a mesma lógica de db_produto_listar para FTS vs fallback LIKE."""
+    termo = str(termo or "").strip()
+    params = []
+
+    if termo:
+        tokens = [t + '*' for t in termo.split() if t]
+        fts_query = ' '.join(tokens)
+        termino_exato = termo
+        termino_contem = '%' + termo.lower() + '%'
+        termino_codigo_prefixo = termo + '%'
+
+        try:
+            sql = """
+                SELECT COUNT(DISTINCT p.codigo_barras)
+                FROM produtos p
+                LEFT JOIN produtos_fts f ON f.codigo_barras = p.codigo_barras
+                WHERE (
+                    f MATCH ?
+                    OR p.codigo_barras = ?
+                    OR p.codigo_barras LIKE ?
+                    OR lower(p.descricao) = lower(?)
+                    OR lower(p.descricao) LIKE ?
+                    OR lower(p.descricao) LIKE ?
+                )
+            """
+            params = [fts_query, termino_exato, termino_codigo_prefixo, termino_exato, termino_contem, termino_contem]
+            if not incluir_inativos:
+                sql += " AND p.ativo = 1"
+            row = db_buscar_um(sql, tuple(params))
+            return row[0] if row else 0
+        except Exception:
+            # Fallback para LIKE quando FTS não está disponível
+            sql = "SELECT COUNT(*) FROM produtos WHERE (lower(descricao) LIKE ? OR codigo_barras LIKE ? OR codigo_barras = ? OR lower(descricao) = ?)"
+            params = [termino_contem, termino_codigo_prefixo, termino_exato, termino_exato.lower()]
+            if not incluir_inativos:
+                sql += " AND ativo = 1"
+            row = db_buscar_um(sql, tuple(params))
+            return row[0] if row else 0
+    else:
+        sql = "SELECT COUNT(*) FROM produtos"
+        if not incluir_inativos:
+            sql += " WHERE ativo = 1"
+        row = db_buscar_um(sql)
+        return row[0] if row else 0
 
 
 def db_estoque_critico():
