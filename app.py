@@ -1,6 +1,7 @@
 import sqlite3
 import xml.etree.ElementTree as ET
 from flask import Flask, render_template, jsonify, request
+import demo_mode
 
 from database import (
     db_produto_buscar,
@@ -37,6 +38,12 @@ from database import (
 
 app = Flask(__name__)
 inicializar_banco()
+demo_mode.ativar()
+
+
+@app.context_processor
+def inject_demo_mode():
+    return {"demo_mode": demo_mode.esta_ativo()}
 
 # ============================================================
 # ONDE SALVAR OS BACKUPS
