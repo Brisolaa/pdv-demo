@@ -31,10 +31,12 @@ from database import (
     db_caixa_get_ultimo_status,
     db_caixa_ultima_abertura,
     db_caixa_fechamento_apos,
+    inicializar_banco,
 
 )
 
 app = Flask(__name__)
+inicializar_banco()
 
 # ============================================================
 # ONDE SALVAR OS BACKUPS
@@ -43,8 +45,8 @@ app = Flask(__name__)
 # Pra fazer o backup subir sozinho pra nuvem, troque o caminho abaixo pra dentro da
 # pasta que o Google Drive / OneDrive já sincroniza automaticamente no computador.
 # Exemplos (ajuste pro caminho real da sua máquina):
-#   BACKUP_PASTA = r"C:\Users\Junior\Google Drive\Backups PDV Emporio"
-#   BACKUP_PASTA = r"C:\Users\Junior\OneDrive\Backups PDV Emporio"
+#   BACKUP_PASTA = r"C:\Users\Usuario\Google Drive\Backups PDV Emporio"
+#   BACKUP_PASTA = r"C:\Users\Usuario\OneDrive\Backups PDV Emporio"
 # Depois de trocar, todo fechamento de caixa já salva direto na pasta sincronizada —
 # nenhum outro código precisa mudar.
 BACKUP_PASTA = r"backups"  # tests and default behavior use local 'backups' folder
